@@ -3,9 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from "cors"; // permitir coneiones desde el domini del front
 import swaggerUi from 'swagger-ui-express';
-
-import swaggerSpec, { swaggerUiOptions } from './config/swagger.js';
-
+import swaggerOutput from './config/swagger-output.json' with { type: 'json' };
 
 //  +++++++++++ Modulos ++++++++++++++++
 import conectarDB from "./config/db.js";
@@ -13,7 +11,6 @@ import { sanitizeObject } from './middleware/sanitiza.js';
 
 //  +++++++++++ Routes +++++++++++++++++
 import usuarioRoutes from './routes/usuarioRoutes.js';
-
 
 // Esto va a buscar por un archivo .env
 dotenv.config();
@@ -33,7 +30,7 @@ conectarDB();
 
 // Dominios Permitidos
 const whiteList = [
-    process.env.E_FRONT
+    process.env.E_FRONT, process.env.TEST_BACK
 ];
 
 const corsOptions = {
@@ -65,8 +62,14 @@ app.use((req, res, next) => {
 //http://tu-servidor.com/uploads/nombreArchivo.jpg
 app.use('/public/uploads', express.static('public/uploads')); // 'uploads' es la carpeta donde guardas las imágenes
 app.use('/auth', usuarioRoutes);
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
+// Opciones de Swagger UI
+const swaggerUiOptions = {
+    customSiteTitle: 'Documentación REST API Express'
+};
+
+// Servir documentación generada por swagger-autogen
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput, swaggerUiOptions));
 
 // Iniciando el servidor
 app.listen(port, () => {
