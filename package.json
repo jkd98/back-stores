@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:gen": "node ./config/swagger-autogen.js",
+    "preserver": "node ./config/swagger-autogen.js",
+    "prestart": "node ./config/swagger-autogen.js",
     "server": "nodemon ./index.js",
     "start": "node index.js"
   },
@@ -22,6 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.3",
     "nodemailer": "^7.0.5",
+    "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
