@@ -63,13 +63,15 @@ app.use((req, res, next) => {
 app.use('/public/uploads', express.static('public/uploads')); // 'uploads' es la carpeta donde guardas las imágenes
 app.use('/auth', usuarioRoutes);
 
-// Opciones de Swagger UI
-const swaggerUiOptions = {
-    customSiteTitle: 'Documentación REST API Express'
-};
 
 // Servir documentación generada por swagger-autogen
+const swaggerUiOptions = {
+    customSiteTitle: 'Documentación REST API Express'
+}
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput, swaggerUiOptions));
+
+
+
 
 // Iniciando el servidor
 app.listen(port, () => {

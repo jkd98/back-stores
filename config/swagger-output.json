@@ -19,6 +19,9 @@
   "paths": {
     "/auth/registro": {
       "post": {
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "responses": {
           "201": {
@@ -58,6 +61,9 @@
     },
     "/auth/confirmar-cuenta/{token}": {
       "get": {
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {
@@ -84,6 +90,9 @@
     },
     "/auth/login": {
       "post": {
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "responses": {
           "200": {
@@ -120,6 +129,9 @@
     },
     "/auth/verify-2fa": {
       "post": {
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "responses": {
           "200": {
@@ -153,6 +165,9 @@
     },
     "/auth/tkn-reset": {
       "post": {
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "responses": {
           "200": {
@@ -183,6 +198,9 @@
     },
     "/auth/new-pass/{token}": {
       "get": {
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {
@@ -207,6 +225,9 @@
         }
       },
       "post": {
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {

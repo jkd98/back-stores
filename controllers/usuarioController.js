@@ -11,6 +11,7 @@ import { Respuesta } from "../models/Respuesta.js";
 
 // Función para registrar un nuevo usuario
 const registrarUsuario = async (req, res) => {
+    // #swagger.tags = ['Auth']
     let respuesta = new Respuesta();
 
     try {
@@ -57,8 +58,11 @@ const registrarUsuario = async (req, res) => {
 };
 
 const confirmarCuenta = async (req, res) => {
+    // #swagger.tags = ['Auth']
+
     let respuesta = new Respuesta();
     const { token } = req.params;
+    console.log(token)
     try {
         const preregistro = await PreRegistro.findOne({ token });
         if (!preregistro) {
@@ -90,6 +94,8 @@ const confirmarCuenta = async (req, res) => {
 }
 
 const login = async (req, res) => {
+    // #swagger.tags = ['Auth']
+
     let respuesta = new Respuesta();
 
     try {
@@ -137,6 +143,8 @@ const login = async (req, res) => {
 }
 
 const verify2FA = async (req, res) => {
+    // #swagger.tags = ['Auth']
+
     let respuesta = new Respuesta()
     try {
         const { userId, code } = req.body;
@@ -178,6 +186,8 @@ const verify2FA = async (req, res) => {
 }
 
 const tokenResetPassword = async (req, res) => {
+    // #swagger.tags = ['Auth']
+
     let respuesta = new Respuesta();
     try {
         const { email } = req.body;
@@ -212,6 +222,8 @@ const tokenResetPassword = async (req, res) => {
 }
 
 const confirmarTokenReset = async (req, res) => {
+    // #swagger.tags = ['Auth']
+
     let respuesta = new Respuesta();
     try {
         const { token } = req.params;
@@ -237,6 +249,8 @@ const confirmarTokenReset = async (req, res) => {
 }
 
 const resetPassword = async (req, res) => {
+    // #swagger.tags = ['Auth']
+
     let respuesta = new Respuesta();
     try {
         const { token } = req.params;

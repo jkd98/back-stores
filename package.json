@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "docs:gen": "node ./config/swagger-autogen.js",
-    "preserver": "node ./config/swagger-autogen.js",
-    "prestart": "node ./config/swagger-autogen.js",
+    "swagger": "node ./config/swagger-autogen.js",
+    "preserver": "npm run swagger",
     "server": "nodemon ./index.js",
     "start": "node index.js"
   },
