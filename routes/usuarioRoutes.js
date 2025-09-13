@@ -21,6 +21,7 @@ import { manejarErrores } from "../middleware/manejadorErrores.js";
 // con esto puedo usar los metodos http
 const router = express.Router();
 
+
 router.post('/registro', validarRegistro, manejarErrores, registrarUsuario);
 router.get('/confirmar-cuenta/:token', confirmarCuenta);
 router.post('/login', validarLogin, manejarErrores ,login);

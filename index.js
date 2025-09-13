@@ -2,6 +2,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from "cors"; // permitir coneiones desde el domini del front
+import swaggerUi from 'swagger-ui-express';
+
+import swaggerSpec, { swaggerUiOptions } from './config/swagger.js';
+
 
 //  +++++++++++ Modulos ++++++++++++++++
 import conectarDB from "./config/db.js";
@@ -61,6 +65,8 @@ app.use((req, res, next) => {
 //http://tu-servidor.com/uploads/nombreArchivo.jpg
 app.use('/public/uploads', express.static('public/uploads')); // 'uploads' es la carpeta donde guardas las imágenes
 app.use('/auth', usuarioRoutes);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
 
 // Iniciando el servidor
 app.listen(port, () => {
