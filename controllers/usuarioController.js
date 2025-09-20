@@ -28,7 +28,7 @@ const registrarUsuario = async (req, res) => {
         // Hashear la contraseña
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(pass, salt);
-
+        console.log(pass)
         const preregistro = new PreRegistro({
             name,
             lastN,
