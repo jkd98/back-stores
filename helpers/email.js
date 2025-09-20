@@ -55,8 +55,7 @@ const emailOlvidePass = async (datos) => {
     const html = `
         <></>
         <p>Hola ${name}, haz solicitado cambiar tu password en ${domainn}</p>
-        <p>Sigue el siguiente enlace para generar un password nuevo:
-        <a href="${reff}/#/shared/confirm-tkn-pass/${token}" >Reestablecer Password</a> </p>
+        <p>Ingresar el siguiente código: ${token}</p>
         <p>Si tu no solicitaste el cambio de contraseña, puedes ignorar el mensaje</p>
     `;
     //Enviar
