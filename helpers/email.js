@@ -18,10 +18,8 @@ const emailRegistro = async (datos) => {
     const text = `Confirma tu Cuenta en ${domainn} ahora:`;
     const reff = process.env.E_FRONT;
     const html = `
-        <></>
         <p>Hola ${name}, comprueba tu cuenta en ${domainn}</p>
-        <p>Tu cuenta ya esta casi lista, solo debes confirmarla en el siguiente enlace: 
-        <a href="${reff}/#/shared/confirm-account/${token}" >Confirmar Cuenta</a> </p>
+        <p>Tu cuenta ya esta casi lista, solo debes  ingresar el siguiente código: ${token}</p>
         <p>Si tu no creaste esta cuenta, puedes ignorar el mensaje</p>
     `;
     //Enviar

@@ -44,6 +44,10 @@ const usuarioSchema = mongoose.Schema(
         policityAccepted:{
             type:Boolean,
             default:false
+        },
+        ubic:{
+            lat:{type:String},
+            alt:{type:String}
         }
 
     },

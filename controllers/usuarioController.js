@@ -61,7 +61,7 @@ const confirmarCuenta = async (req, res) => {
     // #swagger.tags = ['Auth']
 
     let respuesta = new Respuesta();
-    const { token } = req.params;
+    const { token } = req.body;
     console.log(token)
     try {
         const preregistro = await PreRegistro.findOne({ token });
@@ -226,7 +226,7 @@ const confirmarTokenReset = async (req, res) => {
 
     let respuesta = new Respuesta();
     try {
-        const { token } = req.params;
+        const { token } = req.body;
         const isValidToken = await Usuario.findOne({ token });
         if (!isValidToken) {
             respuesta.status = 'error';
@@ -253,8 +253,7 @@ const resetPassword = async (req, res) => {
 
     let respuesta = new Respuesta();
     try {
-        const { token } = req.params;
-        const { pass } = req.body;
+        const { pass,token } = req.body;
 
         const isValidToken = await Usuario.findOne({ token });
         if (!isValidToken) {

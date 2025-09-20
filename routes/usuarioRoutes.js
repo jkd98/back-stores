@@ -23,12 +23,12 @@ const router = express.Router();
 
 
 router.post('/registro', validarRegistro, manejarErrores, registrarUsuario);
-router.get('/confirmar-cuenta/:token', confirmarCuenta);
+router.get('/confirmar-cuenta', confirmarCuenta);
 router.post('/login', validarLogin, manejarErrores, login);
 router.post('/verify-2fa', verify2FA);
 router.post('/tkn-reset', tokenResetPassword);
-router.get('/new-pass/:token', confirmarTokenReset);
-router.post('/new-pass/:token', validarNwPass, manejarErrores, resetPassword);
+router.get('/new-pass', confirmarTokenReset);
+router.post('/new-pass', validarNwPass, manejarErrores, resetPassword);
 
 
 export default router;

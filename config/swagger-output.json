@@ -59,22 +59,12 @@
         }
       }
     },
-    "/auth/confirmar-cuenta/{token}": {
+    "/auth/confirmar-cuenta": {
       "get": {
         "tags": [
           "Auth"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -196,22 +186,12 @@
         }
       }
     },
-    "/auth/new-pass/{token}": {
+    "/auth/new-pass": {
       "get": {
         "tags": [
           "Auth"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -229,16 +209,6 @@
           "Auth"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -257,6 +227,9 @@
                 "type": "object",
                 "properties": {
                   "pass": {
+                    "example": "any"
+                  },
+                  "token": {
                     "example": "any"
                   }
                 }

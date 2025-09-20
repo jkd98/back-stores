@@ -27,7 +27,12 @@ export const validarRegistro = [
     .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres')
     .matches(/[A-Z]/).withMessage('Debe contener al menos una mayúscula')
     .matches(/[0-9]/).withMessage('Debe contener al menos un número')
-    .matches(/[-_!@#$%^&*()+={};:,.<>?~]/).withMessage('Debe contener un carácter especial'),
+    .matches(/[-_!@#$%^&*()+={};:,.<>?~]/).withMessage('Debe contener un carácter especial').custom((value) => {
+    if (value.includes("'")) {
+      throw new Error('La contraseña no puede contener comillas simples');
+    }
+    return true;
+  }),,
 ];
 
 export const validarLogin = [
