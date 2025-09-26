@@ -6,20 +6,20 @@ export const validarRegistro = [
     .trim() // Elimina espacios al inicio/final
     .notEmpty().withMessage('El nombre es obligatorio')
     .isLength({ min: 2 }).withMessage('El nombre debe tener al menos 2 caracteres'),
-    
+
   // Valida 'lastN' (apellido)
   body('lastN')
     .trim()
     .notEmpty().withMessage('El apellido es obligatorio')
     .isLength({ min: 2 }).withMessage('El apellido debe tener al menos 2 caracteres'),
-    
+
   // Valida 'email'
   body('email')
     .trim()
     .notEmpty().withMessage('El email es obligatorio')
     .isEmail().withMessage('Debe ser un email válido')
     .normalizeEmail(), // Convierte a minúsculas y limpia formato
-    
+
   // Valida 'pass' (contraseña)
   body('pass')
     .trim()
@@ -28,11 +28,28 @@ export const validarRegistro = [
     .matches(/[A-Z]/).withMessage('Debe contener al menos una mayúscula')
     .matches(/[0-9]/).withMessage('Debe contener al menos un número')
     .matches(/[-_!@#$%^&*()+={};:,.<>?~]/).withMessage('Debe contener un carácter especial').custom((value) => {
-    if (value.includes("'")) {
-      throw new Error('La contraseña no puede contener comillas simples');
-    }
-    return true;
-  }),,
+      if (value.includes("'")) {
+        throw new Error('La contraseña no puede contener comillas simples');
+      }
+      return true;
+    })
+];
+
+export const validConfirmAccount = [
+  // Valida 'email'
+  body('token')
+    .trim()
+    .notEmpty().withMessage('El token es obligatorio')
+];
+
+export const validarNuevoTknConfirm = [
+  // Valida 'email'
+  body('email')
+    .trim()
+    .notEmpty().withMessage('El email es obligatorio')
+    .isEmail().withMessage('Debe ser un email válido')
+    .normalizeEmail(), // Convierte a minúsculas y limpia formato
+
 ];
 
 export const validarLogin = [
@@ -42,13 +59,28 @@ export const validarLogin = [
     .notEmpty().withMessage('El email es obligatorio')
     .isEmail().withMessage('Debe ser un email válido')
     .normalizeEmail(), // Convierte a minúsculas y limpia formato
-    
+
   // Valida 'pass' (contraseña)
   body('pass')
     .trim()
     .notEmpty().withMessage('La contraseña es obligatoria')
     .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres')
 ];
+
+export const validar2FAData = [
+  body('userId')
+    .trim()
+    .notEmpty().withMessage('El ID del usuario es obligatorio')
+    .isMongoId().withMessage('El ID del usuario debe ser válido')
+]
+
+export const validarTknResetPassEmail = [
+  body('email')
+    .trim()
+    .notEmpty().withMessage('El email es obligatorio')
+    .isEmail().withMessage('Debe ser un email válido')
+    .normalizeEmail(), // Convierte a minúsculas y limpia formato
+]
 
 export const validarNwPass = [
   body('pass')
@@ -59,3 +91,4 @@ export const validarNwPass = [
     .matches(/[0-9]/).withMessage('Debe contener al menos un número')
     .matches(/[-_!@#$%^&*()+={};:,.<>?~]/).withMessage('Debe contener un carácter especial'),
 ];
+

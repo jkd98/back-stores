@@ -19,11 +19,14 @@ const emailRegistro = async (datos) => {
     const reff = process.env.E_FRONT;
     const html = `
         <p>Hola ${name}, comprueba tu cuenta en ${domainn}</p>
-        <p>Tu cuenta ya esta casi lista, solo debes  ingresar el siguiente código: ${token}</p>
+        <p>Tu cuenta ya esta casi lista, solo debes ingresar el siguiente código: ${token}</p>
+        <p>Dando click en el siguiente <a href="http://localhost:4200/usuario/confirmar-cuenta">enlace</a> </p>
+        <p>Este código expira en 5 minutos</p>
+        
         <p>Si tu no creaste esta cuenta, puedes ignorar el mensaje</p>
     `;
     //Enviar
-    await transport.sendMail({
+    const response = await transport.sendMail({
         from: domainn, //quie?
         to: email, //para quien?
         subject, //asunto
@@ -31,6 +34,43 @@ const emailRegistro = async (datos) => {
         html
     })
 
+    return response;
+
+};
+
+const emailNuevoToken = async (datos) => {
+    // Looking to send emails in production? Check out our Email API/SMTP product!
+    const transport = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+    //console.log(datos);
+    const { email, name, token } = datos;
+    const domainn = 'EventStar.com'
+
+    const subject = `Confirma tu Cuenta en ${domainn}`;
+    const text = `Confirma tu Cuenta en ${domainn} ahora:`;
+    const reff = process.env.E_FRONT;
+    const html = `
+        <p>Hola ${name}.</p>
+        <p>Este es tu nuevo código: ${token}</p>
+        <p>Este código expirará en 5 minutos.</p>
+
+    `;
+    //Enviar
+    const response = await transport.sendMail({
+        from: domainn, //quie?
+        to: email, //para quien?
+        subject, //asunto
+        text,
+        html
+    })
+
+    return response;
 
 };
 
@@ -91,13 +131,17 @@ const emailCodigoVerificacion = async ({ email, name, code }) => {
         <p>Este código expirará en 5 minutos.</p>
     `;
     //Enviar
-    await transport.sendMail({
-        from: domainn, //quie?
-        to: email, //para quien?
-        subject, //asunto
-        text,
-        html
-    })
+    try {
+        await transport.sendMail({
+            from: domainn, //quie?
+            to: email, //para quien?
+            subject, //asunto
+            text,
+            html
+        })
+    } catch (error) {
+        
+    }
 
 
 };
@@ -106,5 +150,6 @@ const emailCodigoVerificacion = async ({ email, name, code }) => {
 export {
     emailRegistro,
     emailOlvidePass,
-    emailCodigoVerificacion
+    emailCodigoVerificacion,
+    emailNuevoToken
 }

@@ -7,27 +7,36 @@ import {
     verify2FA,
     tokenResetPassword,
     confirmarTokenReset,
-    resetPassword
+    resetPassword,
+    generarTokenConfirm
 } from "../controllers/usuarioController.js";
 
 import {
     validarRegistro,
+    validConfirmAccount,
+    validarNuevoTknConfirm,
     validarLogin,
-    validarNwPass
+    validarNwPass,
+    validar2FAData,
+    validarTknResetPassEmail
 } from "../validators/usuarioValidator.js";
 
 import { manejarErrores } from "../middleware/manejadorErrores.js";
+import { checkBloquedIP } from "../middleware/checkBlockIp.js";
 
 // con esto puedo usar los metodos http
 const router = express.Router();
 
 
 router.post('/registro', validarRegistro, manejarErrores, registrarUsuario);
-router.post('/confirmar-cuenta', confirmarCuenta);
-router.post('/login', validarLogin, manejarErrores, login);
-router.post('/verify-2fa', verify2FA);
-router.post('/tkn-reset', tokenResetPassword);
-//router.get('/new-pass', confirmarTokenReset);
+router.post('/confirmar-cuenta', validConfirmAccount, manejarErrores, confirmarCuenta);
+router.post('/new-code-confirm', validarNuevoTknConfirm, manejarErrores, generarTokenConfirm);
+router.post('/login', validarLogin, manejarErrores, checkBloquedIP, login);
+router.post('/verify-2fa', validar2FAData, manejarErrores, checkBloquedIP, verify2FA);
+
+
+router.post('/tkn-reset', validarTknResetPassEmail, manejarErrores, tokenResetPassword);
+router.post('/new-pass-tkn', confirmarTokenReset);
 router.post('/new-pass', validarNwPass, manejarErrores, resetPassword);
 
 

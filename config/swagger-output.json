@@ -60,7 +60,7 @@
       }
     },
     "/auth/confirmar-cuenta": {
-      "get": {
+      "post": {
         "tags": [
           "Auth"
         ],
@@ -69,11 +69,61 @@
           "201": {
             "description": "Created"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "404": {
             "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/new-code-confirm": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -93,6 +143,9 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
           },
           "500": {
             "description": "Internal Server Error"
@@ -130,6 +183,9 @@
           "404": {
             "description": "Not Found"
           },
+          "429": {
+            "description": "Too Many Requests"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -140,10 +196,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "userId": {
+                  "code": {
                     "example": "any"
                   },
-                  "code": {
+                  "userId": {
                     "example": "any"
                   }
                 }
@@ -186,8 +242,8 @@
         }
       }
     },
-    "/auth/new-pass": {
-      "get": {
+    "/auth/new-pass-tkn": {
+      "post": {
         "tags": [
           "Auth"
         ],
@@ -202,8 +258,24 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
-      },
+      }
+    },
+    "/auth/new-pass": {
       "post": {
         "tags": [
           "Auth"

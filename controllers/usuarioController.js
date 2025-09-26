@@ -1,17 +1,20 @@
 import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
+
+import { emailRegistro, emailCodigoVerificacion, emailOlvidePass } from "../helpers/email.js"
+import { generateSixDigitToken } from "../helpers/genSixDigitToken.js";
+import { generarJWT } from '../helpers/generarJWT.js'
 
 import Usuario from "../models/Usuario.js";
-import PreRegistro from "../models/PreRegistro.js";
-import { generarId, generarJWT, generarCode2fA } from "../helpers/generarId.js";
-import { emailRegistro, emailCodigoVerificacion, emailOlvidePass } from "../helpers/email.js"
-import TwoFactorCode from "../models/TwoFactorCode.js";
-
 import { Respuesta } from "../models/Respuesta.js";
+import Token, { tokenTypes } from "../models/Token.js";
+import { crearLog, obtenerIP } from "../helpers/crearLog.js";
+import { NivelesLog } from "../helpers/crearLog.js";
+import { getLocation } from "../helpers/getLocation.js";
 
 // Función para registrar un nuevo usuario
 const registrarUsuario = async (req, res) => {
     // #swagger.tags = ['Auth']
+
     let respuesta = new Respuesta();
 
     try {
@@ -29,19 +32,33 @@ const registrarUsuario = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(pass, salt);
         console.log(pass)
-        const preregistro = new PreRegistro({
+
+
+        //Generar usuario
+        const nwUser = new Usuario({
             name,
             lastN,
             email,
             pass: hashedPassword,
-            token: generarId()
         });
 
-        console.log("Preregistro:\n", preregistro);
+        console.log("Preregistro:\n", nwUser);
+
+        // Generar token
+        const nwToken = new Token({
+            userId: nwUser._id,
+            code: generateSixDigitToken(),
+            expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+            used: false,
+            typeCode: tokenTypes.ACCOUNT_CONFIRMATION
+        })
+
+        //Guardar token y usuario
+        await Promise.allSettled([nwToken.save(), nwUser.save()])
 
 
-        preregistro.save()
-        emailRegistro({ email, name, token: preregistro.token });
+        //TODO:Activar el envio de emails
+        //emailRegistro({ email, name, token: nwToken.code });
 
         respuesta.status = 'success';
         respuesta.msg = 'Registro completado, confirma tu cuenta para activarla';
@@ -62,22 +79,19 @@ const confirmarCuenta = async (req, res) => {
 
     let respuesta = new Respuesta();
     const { token } = req.body;
-    console.log(token)
     try {
-        const preregistro = await PreRegistro.findOne({ token });
-        if (!preregistro) {
+        // new Date() => hora en UTC igual que en mongo 
+        const isValidToken = await Token.findOne({ code: token, expiresAt: { $gt: new Date() }, typeCode: tokenTypes.ACCOUNT_CONFIRMATION });
+        if (!isValidToken) {
             respuesta.status = 'error';
-            respuesta.msg = 'El token no es válido o ya fue utilizado';
+            respuesta.msg = 'El token no es válido o ya expiró';
             return res.status(404).json(respuesta);
         }
-        console.log(preregistro);
 
-        const { name, lastN, email, pass, createdAt } = preregistro;
+        const userExists = await Usuario.findById(isValidToken.userId);
+        userExists.emailConfirm = true;
 
-        const nwUSer = new Usuario({ name, lastN, email, pass, createdAt });
-        console.log(nwUSer);
-        await nwUSer.save();
-        await PreRegistro.deleteOne({ token });
+        await Promise.allSettled([userExists.save(), isValidToken.deleteOne()]);
 
         respuesta.status = 'success';
         respuesta.msg = 'Cuenta confirmada, ya puedes iniciar sesión';
@@ -88,6 +102,60 @@ const confirmarCuenta = async (req, res) => {
         console.log(error);
         respuesta.status = 'error';
         respuesta.msg = 'Error al confirmar la cuenta';
+        respuesta.data = error.message;
+        return res.status(500).json(respuesta);
+    }
+}
+
+
+const generarTokenConfirm = async (req, res) => {
+    // #swagger.tags = ['Auth']
+
+    let respuesta = new Respuesta();
+
+    try {
+        const { email } = req.body;
+        // Verificar si el email ya está registrado
+        const existeUsuario = await Usuario.findOne({ email });
+        if (!existeUsuario) {
+            respuesta.status = 'error';
+            respuesta.msg = 'El usuario no esta registrado';
+            return res.status(400).json(respuesta);
+        }
+
+        //Verificar si no ha confirmado la cuenta
+        if (existeUsuario.emailConfirm) {
+            respuesta.status = 'error';
+            respuesta.msg = 'Esta cuenta ya ha sido confirmada';
+            return res.status(400).json(respuesta);
+        }
+
+
+        // Generar token
+        const nwToken = new Token({
+            userId: existeUsuario._id,
+            code: generateSixDigitToken(),
+            expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+            used: false,
+            typeCode: tokenTypes.ACCOUNT_CONFIRMATION
+
+        })
+
+        //Guardar token y usuario
+        await Promise.allSettled([nwToken.save()])
+
+
+        emailRegistro({ email, name: existeUsuario.name, token: nwToken.code });
+
+        respuesta.status = 'success';
+        respuesta.msg = 'Nuevo token enviado al email';
+        respuesta.data = null;
+        return res.status(201).json(respuesta);
+
+    } catch (error) {
+        console.log(error);
+        respuesta.status = 'error';
+        respuesta.msg = 'Error al generar el token';
         respuesta.data = error.message;
         return res.status(500).json(respuesta);
     }
@@ -114,16 +182,37 @@ const login = async (req, res) => {
             return res.status(404).json(respuesta);
         }
 
+        if (!user.emailConfirm) {
+            // Generar token
+            const nwToken = new Token({
+                userId: user._id,
+                code: generateSixDigitToken(),
+                expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+                used: false,
+                typeCode: tokenTypes.ACCOUNT_CONFIRMATION
+
+            })
+
+            //Guardar token y usuario
+            await Promise.allSettled([nwToken.save()])
+
+            emailRegistro({ email, name: user.name, token: nwToken.code });
+            respuesta.status = 'error';
+            respuesta.msg = 'La cuenta no ha sido confirmada. Se ha enviado un codigo de confirmación a tu email';
+            return res.status(404).json(respuesta);
+        }
+
         // Generar código 2FA
-        const twoFactorCode = new TwoFactorCode({
+        const twoFactorCode = new Token({
             userId: user._id,
-            code: generarCode2fA(),
+            code: generateSixDigitToken(),
             expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
-            ipAddress: req.ip,
-            used: false
+            used: false,
+            typeCode: tokenTypes.TWO_FACTOR
         })
 
-        emailCodigoVerificacion({ name: user.name, email: user.email, code: twoFactorCode.code })
+        //TODO:Activar envio de emails
+        await emailCodigoVerificacion({ name: user.name, email: user.email, code: twoFactorCode.code })
 
         await twoFactorCode.save();
 
@@ -134,6 +223,17 @@ const login = async (req, res) => {
 
     } catch (error) {
         console.log(error);
+        if (error.isEmailError) {
+            console.log('hola');
+            const code = await TwoFactorCode.findOne({ userId: user._id })
+            res.json({ code: 'Your code is: ' + generarCode2fA() })
+        } else {
+
+            respuesta.status = 'error';
+            respuesta.msg = 'Error al iniciar sesión';
+            respuesta.data = error.message;
+            return res.status(500).json(respuesta);
+        }
 
         respuesta.status = 'error';
         respuesta.msg = 'Error al iniciar sesión';
@@ -145,29 +245,46 @@ const login = async (req, res) => {
 const verify2FA = async (req, res) => {
     // #swagger.tags = ['Auth']
 
+
     let respuesta = new Respuesta()
     try {
-        const { userId, code } = req.body;
+        const { code, userId } = req.body;
 
-        const validCode = await TwoFactorCode.findOne({
+
+        const validCode = await Token.findOne({
             userId,
             code,
             expiresAt: { $gt: new Date() },
-            used: false
+            used: false,
+            typeCode: tokenTypes.TWO_FACTOR
         })
 
         console.log(validCode)
         if (!validCode) {
+            await crearLog({
+                nivel: NivelesLog.ERROR,
+                mensaje: `El codigo ingresado no es válido`,
+                ruta: req.originalUrl,
+                ip: obtenerIP(req)
+            })
             respuesta.status = 'error';
             respuesta.msg = 'El codigo no es correcto o ya expiró';
             return res.status(404).json(respuesta);
         }
-
         //
-        validCode.used = true;
-        await validCode.save();
+        await validCode.deleteOne()
         //  generar JWT
         const tkn = generarJWT({ userId });
+
+        //TODO:Guardar ubicación
+        const location = await getLocation();
+        const user = await Usuario.findOne({_id:userId});
+        console.log(location,user);
+        user.ubic.lat = location.location.lat;
+        user.ubic.lng = location.location.lng
+
+        await user.save()
+
         respuesta.status = 'success';
         respuesta.msg = 'Autenticación exitosa';
         respuesta.data = tkn;
@@ -175,8 +292,6 @@ const verify2FA = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error);
-
         respuesta.status = 'error';
         respuesta.msg = 'Error al iniciar sesión';
         respuesta.data = error.message;
@@ -200,12 +315,20 @@ const tokenResetPassword = async (req, res) => {
         }
 
         //  Generar token
-        existsUser.token = generarId();
-        existsUser.save();
+        const nwToken = new Token({
+            userId: existsUser._id,
+            code: generateSixDigitToken(),
+            expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+            used: false,
+            typeCode: tokenTypes.PASSWORD_RESET
 
+        })
+
+        //TODO:Activar el envio de emails
         //  Enviar email con token
-        emailOlvidePass({ email, name: existsUser.name, token: existsUser.token });
+        //emailOlvidePass({ email, name: existsUser.name, token: nwToken.code });
 
+        await nwToken.save()
         respuesta.status = 'success';
         respuesta.msg = 'Se ha enviado un email con las instrucciones';
         return res.status(200).json(respuesta);
@@ -227,7 +350,7 @@ const confirmarTokenReset = async (req, res) => {
     let respuesta = new Respuesta();
     try {
         const { token } = req.body;
-        const isValidToken = await Usuario.findOne({ token });
+        const isValidToken = await Token.findOne({ code: token, typeCode: tokenTypes.PASSWORD_RESET });
         if (!isValidToken) {
             respuesta.status = 'error';
             respuesta.msg = 'El token no es válido o ya fue utilizado';
@@ -253,25 +376,27 @@ const resetPassword = async (req, res) => {
 
     let respuesta = new Respuesta();
     try {
-        const { pass,token } = req.body;
+        const { pass, token } = req.body;
 
-        const isValidToken = await Usuario.findOne({ token });
+        const isValidToken = await Token.findOne({ code: token, typeCode: tokenTypes.PASSWORD_RESET });
+
         if (!isValidToken) {
             respuesta.status = 'error';
             respuesta.msg = 'El token no es válido o ya fue utilizado';
             return res.status(400).json(respuesta);
         }
 
+        const isValidUser = await Usuario.findById(isValidToken.userId);
+
+
         //  Nueva password
         // Hashear la contraseña
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(pass, salt);
 
-        isValidToken.token = '';
-        isValidToken.pass = hashedPassword;
+        isValidUser.pass = hashedPassword;
 
-        console.log(isValidToken);
-        await isValidToken.save();
+        await Promise.allSettled([isValidToken.save(), isValidToken.deleteOne()]);
 
 
         respuesta.status = 'success';
@@ -284,7 +409,7 @@ const resetPassword = async (req, res) => {
         respuesta.status = 'error';
         respuesta.msg = 'Error al cambiar el password';
         respuesta.data = error.message;
-        return res.status(500).json(respuesta); 
+        return res.status(500).json(respuesta);
     }
 }
 
@@ -296,4 +421,5 @@ export {
     tokenResetPassword,
     confirmarTokenReset,
     resetPassword,
+    generarTokenConfirm
 }

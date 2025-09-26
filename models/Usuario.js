@@ -28,18 +28,14 @@ const usuarioSchema = mongoose.Schema(
             lowercase: true,
             match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Email no válido"]
         },
-        token: {
-            type: String,
-            default:''
-        },
         emailConfirm: {
             type: Boolean,
-            default: true
+            default: false
         },
         role: {
             type: String,
-            default: 'Cliente',
-            enum: ['Cliente', '4DMlN']
+            default: 'Client',
+            enum: ['Client', '4DMlN']
         },
         policityAccepted:{
             type:Boolean,
@@ -47,7 +43,7 @@ const usuarioSchema = mongoose.Schema(
         },
         ubic:{
             lat:{type:String},
-            alt:{type:String}
+            lng:{type:String}
         }
 
     },
