@@ -18,7 +18,7 @@ const registrarUsuario = async (req, res) => {
     let respuesta = new Respuesta();
 
     try {
-        const { name, lastN, email, pass } = req.body;
+        const { name, lastN, email, pass, telf } = req.body;
         console.log(req.body);
         // Verificar si el email ya está registrado
         const existeUsuario = await Usuario.findOne({ email });
@@ -40,6 +40,7 @@ const registrarUsuario = async (req, res) => {
             lastN,
             email,
             pass: hashedPassword,
+            telf
         });
 
         console.log("Preregistro:\n", nwUser);
@@ -74,6 +75,7 @@ const registrarUsuario = async (req, res) => {
     }
 };
 
+// Funcion para confirmar la cuenta de un usuario
 const confirmarCuenta = async (req, res) => {
     // #swagger.tags = ['Auth']
 
@@ -107,7 +109,7 @@ const confirmarCuenta = async (req, res) => {
     }
 }
 
-
+// Funcion que vuelve a generar un token para confirmar la cuenta
 const generarTokenConfirm = async (req, res) => {
     // #swagger.tags = ['Auth']
 
@@ -161,13 +163,14 @@ const generarTokenConfirm = async (req, res) => {
     }
 }
 
+// Funcion que al ingresar email y pass genera el token de 2FA
 const login = async (req, res) => {
     // #swagger.tags = ['Auth']
 
     let respuesta = new Respuesta();
+    const { email, pass } = req.body;
 
     try {
-        const { email, pass } = req.body;
         const user = await Usuario.findOne({ email });
         if (!user) {
             respuesta.status = 'error';
@@ -222,35 +225,39 @@ const login = async (req, res) => {
         return res.status(200).json(respuesta);
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         if (error.isEmailError) {
             console.log('hola');
-            const code = await TwoFactorCode.findOne({ userId: user._id })
-            res.json({ code: 'Your code is: ' + generarCode2fA() })
-        } else {
+            console.log(req.body);
+            const user = await Usuario.findOne({ email });
+            // Generar código 2FA
+            const twoFactorCode = new Token({
+                userId: user._id,
+                code: generateSixDigitToken(),
+                expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+                used: false,
+                typeCode: tokenTypes.TWO_FACTOR
+            })
+            await twoFactorCode.save();
 
+            res.json({ code: 'Your code is: ' + twoFactorCode.code })
+        } else {
             respuesta.status = 'error';
             respuesta.msg = 'Error al iniciar sesión';
             respuesta.data = error.message;
             return res.status(500).json(respuesta);
         }
-
-        respuesta.status = 'error';
-        respuesta.msg = 'Error al iniciar sesión';
-        respuesta.data = error.message;
-        return res.status(500).json(respuesta);
     }
 }
 
+// Funcion que valida el token para autenticación 2FA
 const verify2FA = async (req, res) => {
     // #swagger.tags = ['Auth']
 
 
     let respuesta = new Respuesta()
+    const { code, userId } = req.body;
     try {
-        const { code, userId } = req.body;
-
-
         const validCode = await Token.findOne({
             userId,
             code,
@@ -272,34 +279,55 @@ const verify2FA = async (req, res) => {
             return res.status(404).json(respuesta);
         }
         //
-        await validCode.deleteOne()
+        //await validCode.deleteOne()
         //  generar JWT
-        const tkn = generarJWT({ userId });
 
         //TODO:Guardar ubicación
         const location = await getLocation();
-        const user = await Usuario.findOne({_id:userId});
-        console.log(location,user);
+        const user = await Usuario.findOne({ _id: userId });
+
+        console.log(location, user);
         user.ubic.lat = location.location.lat;
-        user.ubic.lng = location.location.lng
-
+        user.ubic.lng = location.location.lng;
+        
         await user.save()
-
-        respuesta.status = 'success';
-        respuesta.msg = 'Autenticación exitosa';
-        respuesta.data = tkn;
-        return res.status(200).json(respuesta);
+        const tkn = generarJWT({ userId });
+        
+        if(user.ubic.lat === location.location.lat && user.ubic.lng === location.location.lng){
+            respuesta.status = 'success';
+            respuesta.msg = 'Autenticación exitosa';
+            respuesta.data = tkn;
+            return res.status(200).json(respuesta);
+        }else{
+            respuesta.status = 'success';
+            respuesta.msg = 'Has accedido desde una ubicación diferente';
+            respuesta.data = tkn;
+            return res.status(200).json(respuesta);
+        }
 
 
     } catch (error) {
-        respuesta.status = 'error';
-        respuesta.msg = 'Error al iniciar sesión';
-        respuesta.data = error.message;
-        return res.status(500).json(respuesta);
+        console.log(error)
+        if (error.message === 'fetch failed') {
+            console.log("Error en la API google");
+            const tkn = generarJWT({ userId });
+
+            respuesta.status = 'success';
+            respuesta.msg = 'Autenticación exitosa';
+            respuesta.data = tkn;
+            return res.status(200).json(respuesta);
+        } else {
+            respuesta.status = 'error';
+            respuesta.msg = 'Error al iniciar sesión';
+            respuesta.data = error.message;
+            return res.status(500).json(respuesta);
+        }
     }
 
 }
 
+
+// Funcion que genera un token para cambiar pass
 const tokenResetPassword = async (req, res) => {
     // #swagger.tags = ['Auth']
 
@@ -344,6 +372,7 @@ const tokenResetPassword = async (req, res) => {
     }
 }
 
+// Funcion que comprueba la validez del token de reset pass
 const confirmarTokenReset = async (req, res) => {
     // #swagger.tags = ['Auth']
 
@@ -371,6 +400,7 @@ const confirmarTokenReset = async (req, res) => {
     }
 }
 
+// Función para cambiar la contraseña del usuario
 const resetPassword = async (req, res) => {
     // #swagger.tags = ['Auth']
 
@@ -396,7 +426,7 @@ const resetPassword = async (req, res) => {
 
         isValidUser.pass = hashedPassword;
 
-        await Promise.allSettled([isValidToken.save(), isValidToken.deleteOne()]);
+        await Promise.allSettled([isValidUser.save(), isValidToken.deleteOne()]);
 
 
         respuesta.status = 'success';

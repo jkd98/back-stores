@@ -140,7 +140,10 @@ const emailCodigoVerificacion = async ({ email, name, code }) => {
             html
         })
     } catch (error) {
-        
+        const emailError = new Error(`Error enviando email: ${error.message}`);
+        emailError.isEmailError = true; // Propiedad personalizada
+        emailError.originalError = error;
+        throw emailError;
     }
 
 

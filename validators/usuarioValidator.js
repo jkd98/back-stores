@@ -20,6 +20,10 @@ export const validarRegistro = [
     .isEmail().withMessage('Debe ser un email válido')
     .normalizeEmail(), // Convierte a minúsculas y limpia formato
 
+  body('telf')
+    .trim()
+    .notEmpty().withMessage('El número de celular es obligatorio'),
+
   // Valida 'pass' (contraseña)
   body('pass')
     .trim()

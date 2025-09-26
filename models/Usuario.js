@@ -28,6 +28,10 @@ const usuarioSchema = mongoose.Schema(
             lowercase: true,
             match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Email no válido"]
         },
+        telf: {
+            type:String,
+            required:true
+        },
         emailConfirm: {
             type: Boolean,
             default: false
@@ -42,8 +46,8 @@ const usuarioSchema = mongoose.Schema(
             default:false
         },
         ubic:{
-            lat:{type:String},
-            lng:{type:String}
+            lat:{type:Number},
+            lng:{type:Number}
         }
 
     },
