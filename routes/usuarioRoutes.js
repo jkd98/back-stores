@@ -8,7 +8,8 @@ import {
     tokenResetPassword,
     confirmarTokenReset,
     resetPassword,
-    generarTokenConfirm
+    generarTokenConfirm,
+    logOut
 } from "../controllers/usuarioController.js";
 
 import {
@@ -33,6 +34,7 @@ router.post('/confirmar-cuenta', validConfirmAccount, manejarErrores, confirmarC
 router.post('/new-code-confirm', validarNuevoTknConfirm, manejarErrores, generarTokenConfirm);
 router.post('/login', validarLogin, manejarErrores, checkBloquedIP, login);
 router.post('/verify-2fa', validar2FAData, manejarErrores, checkBloquedIP, verify2FA);
+router.post('/logOut', logOut);
 
 
 router.post('/tkn-reset', validarTknResetPassEmail, manejarErrores, tokenResetPassword);
@@ -41,3 +43,6 @@ router.post('/new-pass', validarNwPass, manejarErrores, resetPassword);
 
 
 export default router;
+
+
+// test2@email.com 

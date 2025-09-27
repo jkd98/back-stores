@@ -48,7 +48,8 @@ const usuarioSchema = mongoose.Schema(
         ubic:{
             lat:{type:Number},
             lng:{type:Number}
-        }
+        },
+        logged:Boolean
 
     },
     {

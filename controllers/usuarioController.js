@@ -185,6 +185,12 @@ const login = async (req, res) => {
             return res.status(404).json(respuesta);
         }
 
+        if (user.logged) {
+            respuesta.status = 'error';
+            respuesta.msg = 'Ya tienes una sesión activa';
+            return res.status(404).json(respuesta);
+        }
+
         if (!user.emailConfirm) {
             // Generar token
             const nwToken = new Token({
@@ -219,6 +225,7 @@ const login = async (req, res) => {
 
         await twoFactorCode.save();
 
+
         respuesta.status = 'success';
         respuesta.msg = 'Token 2FA enviado a correo';
         respuesta.data = user._id;
@@ -230,6 +237,11 @@ const login = async (req, res) => {
             console.log('hola');
             console.log(req.body);
             const user = await Usuario.findOne({ email });
+            if (user.logged) {
+                respuesta.status = 'error';
+                respuesta.msg = 'Ya tienes una sesión activa';
+                return res.status(404).json(respuesta);
+            }
             // Generar código 2FA
             const twoFactorCode = new Token({
                 userId: user._id,
@@ -240,7 +252,7 @@ const login = async (req, res) => {
             })
             await twoFactorCode.save();
 
-            res.json({ code: 'Your code is: ' + twoFactorCode.code })
+            res.json({ code: user._id + ' Your code is: ' + twoFactorCode.code })
         } else {
             respuesta.status = 'error';
             respuesta.msg = 'Error al iniciar sesión';
@@ -286,19 +298,20 @@ const verify2FA = async (req, res) => {
         const location = await getLocation();
         const user = await Usuario.findOne({ _id: userId });
 
-        console.log(location, user);
         user.ubic.lat = location.location.lat;
         user.ubic.lng = location.location.lng;
-        
+        user.logged = true;
         await user.save()
+
+        await validCode.deleteOne()
         const tkn = generarJWT({ userId });
-        
-        if(user.ubic.lat === location.location.lat && user.ubic.lng === location.location.lng){
+
+        if (user.ubic.lat === location.location.lat && user.ubic.lng === location.location.lng) {
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
             respuesta.data = tkn;
             return res.status(200).json(respuesta);
-        }else{
+        } else {
             respuesta.status = 'success';
             respuesta.msg = 'Has accedido desde una ubicación diferente';
             respuesta.data = tkn;
@@ -312,6 +325,19 @@ const verify2FA = async (req, res) => {
             console.log("Error en la API google");
             const tkn = generarJWT({ userId });
 
+            const user = await Usuario.findOne({ _id: userId });
+            user.logged = true;
+            user.save()
+
+            const validCode = await Token.findOne({
+                userId,
+                code,
+                expiresAt: { $gt: new Date() },
+                used: false,
+                typeCode: tokenTypes.TWO_FACTOR
+            })
+            await validCode.deleteOne()
+
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
             respuesta.data = tkn;
@@ -324,6 +350,39 @@ const verify2FA = async (req, res) => {
         }
     }
 
+}
+
+// Funcion para cerrar sesion
+const logOut = async (req, res) => {
+    // #swagger.tags = ['Auth']
+
+    let respuesta = new Respuesta();
+    const { email } = req.body;
+    try {
+        const existsUser = await Usuario.findOne({ email });
+
+        if (!existsUser) {
+            respuesta.status = 'error';
+            respuesta.msg = 'El usuario no existe';
+            return res.status(404).json(respuesta);
+        }
+
+        existsUser.logged = false;
+
+        await existsUser.save()
+        respuesta.status = 'success';
+        respuesta.msg = 'Se ha cerrado la sesión';
+        return res.status(200).json(respuesta);
+
+
+    } catch (error) {
+        console.log(error);
+
+        respuesta.status = 'error';
+        respuesta.msg = 'Error al cerrar sesión';
+        respuesta.data = error.message;
+        return res.status(500).json(respuesta);
+    }
 }
 
 
@@ -451,5 +510,6 @@ export {
     tokenResetPassword,
     confirmarTokenReset,
     resetPassword,
-    generarTokenConfirm
+    generarTokenConfirm,
+    logOut
 }
