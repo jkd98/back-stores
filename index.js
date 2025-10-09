@@ -6,8 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerOutput from './config/swagger-output.json' with { type: 'json' };
 
 //  +++++++++++ Modulos ++++++++++++++++
-import conectarDB from "./config/db.js";
-import { sanitizeObject } from './middleware/sanitiza.js';
+import db from "./config/db.js";
 
 //  +++++++++++ Routes +++++++++++++++++
 import usuarioRoutes from './routes/usuarioRoutes.js';
@@ -24,7 +23,17 @@ app.use(express.json()); // para que procese informacion json correctamente
 const port = process.env.PORT || 3000;
 
 // conectar a la base de datos
-conectarDB();
+export async function connectDB() {
+    try {
+        await db.authenticate()
+        await db.sync() // para poder agregar nuevas columnas
+        console.log("Conexión exitosa a DB"); //--Se comenta para evitar warnings en las pruebas
+    } catch (error) {
+        console.log(error);
+        console.log("error al conectarse a DB")
+    }
+}
+connectDB();
 
 // Configurar CORS
 
@@ -50,13 +59,6 @@ const corsOptions = {
 //Aplicando CORS
 app.use(cors(corsOptions));
 
-// Middleware de sanitización
-app.use((req, res, next) => {
-    if (req.body) sanitizeObject(req.body);
-    if (req.query) sanitizeObject(req.query);
-    if (req.params) sanitizeObject(req.params);
-    next();
-});
 
 // Rutas
 //http://tu-servidor.com/uploads/nombreArchivo.jpg

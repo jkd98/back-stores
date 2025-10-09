@@ -1,13 +1,18 @@
-import Log from '../models/Logs.js'
-import {obtenerIP} from '../helpers/crearLog.js'
+import { Log } from '../models/index.js';
+
+import { obtenerIP,NivelesLog } from '../helpers/crearLog.js'
+import { Op } from 'sequelize';
+
 const LIMITE_INTENTOS = 3;
 const VENTANA_TIEMPO_MIN = 3; // Tiempo que se reta a la hora actual
 const BLOQUEO_MIN = 3; // Tiempo que bloquea la ip
 
 const bloqueos = new Map(); // Guarda IPs bloqueadas en memoria
 
+
 export const checkBloquedIP = async (req, res, next) => {
     const ip = obtenerIP(req);
+    console.log(req.body)
 
     // Si la IP está en lista de bloqueo
     if (bloqueos.has(ip)) {
@@ -19,15 +24,15 @@ export const checkBloquedIP = async (req, res, next) => {
         }
     }
 
-    // Buscar intentos fallidos recientes en Mongo
-    const desde = new Date(Date.now() - VENTANA_TIEMPO_MIN * 60 * 1000); // últimos 10 minutos
+    // Buscar intentos fallidos recientes en BD
+    const desde = new Date(Date.now() - VENTANA_TIEMPO_MIN * 60 * 1000); // últimos N minutos
 
-    const intentosFallidos = await Log.countDocuments({
-        ip,
-        ruta: '/auth/verify-2fa',
-        nivel: 'error',
-        fecha: { $gte: desde }
-    });
+    const intentosFallidos = await Log.count({where:{
+        ip, //Para mitigar DDoS
+        path: '/auth/verify-2fa',
+        level: NivelesLog.ERROR,
+        date: { [Op.gte]: desde }
+    }});
 
 
 

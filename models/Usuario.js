@@ -1,61 +1,106 @@
-import mongoose from "mongoose";
+import { Model, DataTypes } from "sequelize";
+import db from "../config/db.js";
 
-const usuarioSchema = mongoose.Schema(
+export class Usuario extends Model { }
+
+
+//TODO: Investigar si solo ocupo la clase para instanciar un objeto y guardarlo en la DB
+Usuario.init(
     {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         name: {
-            type: String,
-            required: true,
-            trim: true,
-            minLength: [2, "El nombre debe tener al menos 2 caracteres."]
+            type: DataTypes.STRING(100),
+            allowNull: false,
+            validate: {
+                is: {
+                    args: /^[a-zA-Z\s]*$/, // solo letras
+                    msg: 'Solo se admiten letras'
+                },
+                notNull: {
+                    msg: 'Please enter your name',
+                },
+                notEmpty: true,
+            }
         },
         lastN: {
-            type: String,
-            required: true,
-            trim: true,
-            minLength: [2, "El apellido debe tener al menos 2 caracteres."]
+            type: DataTypes.STRING(100),
+            allowNull: false,
+            validate: {
+                is: {
+                    args: /^[a-zA-Z\s]*$/, // solo letras
+                    msg: 'Solo se admiten letras'
+                },
+                notNull: {
+                    msg: 'Please enter your last name',
+                },
+                notEmpty: true,
+            }
         },
         pass: {
-            type: String,
-            required: true,
-            trim: true,
-            minLength: [8, "La contraseña debe tener al menos 8 caracteres."]
+            type: DataTypes.STRING(255),
+            allowNull: false,
+            validate: {
+                notEmpty: true,
+            }
         },
         email: {
-            type: String,
-            required: true,
-            trim: true,
+            type: DataTypes.STRING(150),
+            allowNull: false,
             unique: true,
-            lowercase: true,
-            match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Email no válido"]
+            validate: {
+                isEmail: {
+                    msg:"Debe ser un email válido"
+                },
+                notNull: {
+                    msg: 'Por favor, ingresa tu email',
+                },
+                notEmpty: true,
+            }
         },
         telf: {
-            type:String,
-            required:true
+            type: DataTypes.STRING(10),
+            allowNull: false,
+            validate: {
+                is:{
+                    args:/^[0-9]*$/,
+                    msg:'Solo se admiten números'
+                },
+                notEmpty: true,
+            }
         },
         emailConfirm: {
-            type: Boolean,
-            default: false
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: false
         },
         role: {
-            type: String,
-            default: 'Client',
-            enum: ['Client', '4DMlN']
+            type: DataTypes.ENUM('admin', 'editor', 'lector'),
+            allowNull: false,
+            defaultValue: 'lector'
         },
-        policityAccepted:{
-            type:Boolean,
-            default:false
+        lat: {
+            type: DataTypes.DECIMAL,
+            allowNull: true,
+            defaultValue: 0
         },
-        ubic:{
-            lat:{type:Number},
-            lng:{type:Number}
+        lng: {
+            type: DataTypes.DECIMAL,
+            allowNull: true,
+            defaultValue: 0
         },
-        logged:Boolean
+        logged: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            defaultValue: false
 
+        }
     },
     {
+        sequelize: db,
         timestamps: true
     }
-);
-
-const Usuario = mongoose.model("Usuario", usuarioSchema);
-export default Usuario;
+)

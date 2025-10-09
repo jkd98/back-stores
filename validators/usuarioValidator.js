@@ -5,13 +5,16 @@ export const validarRegistro = [
   body('name')
     .trim() // Elimina espacios al inicio/final
     .notEmpty().withMessage('El nombre es obligatorio')
-    .isLength({ min: 2 }).withMessage('El nombre debe tener al menos 2 caracteres'),
+    .isLength({ min: 2 }).withMessage('El nombre debe tener al menos 2 caracteres')
+    .escape(),
+
 
   // Valida 'lastN' (apellido)
   body('lastN')
     .trim()
     .notEmpty().withMessage('El apellido es obligatorio')
-    .isLength({ min: 2 }).withMessage('El apellido debe tener al menos 2 caracteres'),
+    .isLength({ min: 2 }).withMessage('El apellido debe tener al menos 2 caracteres')
+    .escape(),
 
   // Valida 'email'
   body('email')
@@ -22,7 +25,8 @@ export const validarRegistro = [
 
   body('telf')
     .trim()
-    .notEmpty().withMessage('El número de celular es obligatorio'),
+    .notEmpty().withMessage('El número de celular es obligatorio')
+    .escape(),
 
   // Valida 'pass' (contraseña)
   body('pass')
@@ -44,6 +48,7 @@ export const validConfirmAccount = [
   body('token')
     .trim()
     .notEmpty().withMessage('El token es obligatorio')
+    .escape()
 ];
 
 export const validarNuevoTknConfirm = [
@@ -75,7 +80,15 @@ export const validar2FAData = [
   body('userId')
     .trim()
     .notEmpty().withMessage('El ID del usuario es obligatorio')
-    .isMongoId().withMessage('El ID del usuario debe ser válido')
+    .escape()
+]
+
+export const validarLogOut = [
+  body('email')
+    .trim()
+    .notEmpty().withMessage('El email es obligatorio')
+    .normalizeEmail(), // Convierte a minúsculas y limpia formato
+
 ]
 
 export const validarTknResetPassEmail = [

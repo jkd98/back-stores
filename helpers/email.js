@@ -153,6 +153,6 @@ const emailCodigoVerificacion = async ({ email, name, code }) => {
 export {
     emailRegistro,
     emailOlvidePass,
-    emailCodigoVerificacion,
-    emailNuevoToken
+    emailCodigoVerificacion
+    
 }

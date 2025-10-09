@@ -19,7 +19,8 @@ import {
     validarLogin,
     validarNwPass,
     validar2FAData,
-    validarTknResetPassEmail
+    validarTknResetPassEmail,
+    validarLogOut
 } from "../validators/usuarioValidator.js";
 
 import { manejarErrores } from "../middleware/manejadorErrores.js";
@@ -34,7 +35,7 @@ router.post('/confirmar-cuenta', validConfirmAccount, manejarErrores, confirmarC
 router.post('/new-code-confirm', validarNuevoTknConfirm, manejarErrores, generarTokenConfirm);
 router.post('/login', validarLogin, manejarErrores, checkBloquedIP, login);
 router.post('/verify-2fa', validar2FAData, manejarErrores, checkBloquedIP, verify2FA);
-router.post('/logOut', logOut);
+router.post('/logout', validarLogOut, manejarErrores, logOut);
 
 
 router.post('/tkn-reset', validarTknResetPassEmail, manejarErrores, tokenResetPassword);

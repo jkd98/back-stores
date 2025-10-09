@@ -1,12 +1,13 @@
 import bcrypt from "bcrypt";
+import { Op } from "sequelize";
 
 import { emailRegistro, emailCodigoVerificacion, emailOlvidePass } from "../helpers/email.js"
 import { generateSixDigitToken } from "../helpers/genSixDigitToken.js";
 import { generarJWT } from '../helpers/generarJWT.js'
 
-import Usuario from "../models/Usuario.js";
-import { Respuesta } from "../models/Respuesta.js";
-import Token, { tokenTypes } from "../models/Token.js";
+import { tokenTypes } from "../models/Token.js";
+import { Usuario, Token, Respuesta } from "../models/index.js";
+
 import { crearLog, obtenerIP } from "../helpers/crearLog.js";
 import { NivelesLog } from "../helpers/crearLog.js";
 import { getLocation } from "../helpers/getLocation.js";
@@ -16,12 +17,12 @@ const registrarUsuario = async (req, res) => {
     // #swagger.tags = ['Auth']
 
     let respuesta = new Respuesta();
+    const { name, lastN, email, pass, telf } = req.body;
 
     try {
-        const { name, lastN, email, pass, telf } = req.body;
-        console.log(req.body);
         // Verificar si el email ya está registrado
-        const existeUsuario = await Usuario.findOne({ email });
+        const existeUsuario = await Usuario.findOne({ where: { email } });
+
         if (existeUsuario) {
             respuesta.status = 'error';
             respuesta.msg = 'El email ya está registrado';
@@ -31,11 +32,9 @@ const registrarUsuario = async (req, res) => {
         // Hashear la contraseña
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(pass, salt);
-        console.log(pass)
 
-
-        //Generar usuario
-        const nwUser = new Usuario({
+        //Generar y guardar usuario
+        const nwUser = await Usuario.create({
             name,
             lastN,
             email,
@@ -46,20 +45,16 @@ const registrarUsuario = async (req, res) => {
         console.log("Preregistro:\n", nwUser);
 
         // Generar token
-        const nwToken = new Token({
-            userId: nwUser._id,
+        const nwToken = await Token.create({
+            userId: nwUser.id,
             code: generateSixDigitToken(),
             expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
-            used: false,
             typeCode: tokenTypes.ACCOUNT_CONFIRMATION
         })
 
-        //Guardar token y usuario
-        await Promise.allSettled([nwToken.save(), nwUser.save()])
 
-
-        //TODO:Activar el envio de emails
-        //emailRegistro({ email, name, token: nwToken.code });
+        //TODO: Activar el envio de emails
+        emailRegistro({ email, name, token: nwToken.code });
 
         respuesta.status = 'success';
         respuesta.msg = 'Registro completado, confirma tu cuenta para activarla';
@@ -83,17 +78,32 @@ const confirmarCuenta = async (req, res) => {
     const { token } = req.body;
     try {
         // new Date() => hora en UTC igual que en mongo 
-        const isValidToken = await Token.findOne({ code: token, expiresAt: { $gt: new Date() }, typeCode: tokenTypes.ACCOUNT_CONFIRMATION });
+        const isValidToken = await Token.findOne({
+            where: {
+                code: token,
+                expiresAt: { [Op.gte]: new Date() },
+                typeCode: tokenTypes.ACCOUNT_CONFIRMATION
+            }
+        }
+        );
         if (!isValidToken) {
             respuesta.status = 'error';
             respuesta.msg = 'El token no es válido o ya expiró';
             return res.status(404).json(respuesta);
         }
 
-        const userExists = await Usuario.findById(isValidToken.userId);
+        const userExists = await Usuario.findByPk(isValidToken.userId);
+
+        //Verificar si no ha confirmado la cuenta
+        if (userExists.emailConfirm) {
+            respuesta.status = 'error';
+            respuesta.msg = 'Esta cuenta ya ha sido confirmada';
+            return res.status(400).json(respuesta);
+        }
+
         userExists.emailConfirm = true;
 
-        await Promise.allSettled([userExists.save(), isValidToken.deleteOne()]);
+        await Promise.allSettled([userExists.save(), isValidToken.destroy()]);
 
         respuesta.status = 'success';
         respuesta.msg = 'Cuenta confirmada, ya puedes iniciar sesión';
@@ -118,7 +128,7 @@ const generarTokenConfirm = async (req, res) => {
     try {
         const { email } = req.body;
         // Verificar si el email ya está registrado
-        const existeUsuario = await Usuario.findOne({ email });
+        const existeUsuario = await Usuario.findOne({ where: { email } });
         if (!existeUsuario) {
             respuesta.status = 'error';
             respuesta.msg = 'El usuario no esta registrado';
@@ -134,19 +144,14 @@ const generarTokenConfirm = async (req, res) => {
 
 
         // Generar token
-        const nwToken = new Token({
-            userId: existeUsuario._id,
+        const nwToken = await Token.create({
+            userId: existeUsuario.id,
             code: generateSixDigitToken(),
             expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
-            used: false,
             typeCode: tokenTypes.ACCOUNT_CONFIRMATION
-
         })
 
-        //Guardar token y usuario
-        await Promise.allSettled([nwToken.save()])
-
-
+        // TODO: Habilitar el envio de emails
         emailRegistro({ email, name: existeUsuario.name, token: nwToken.code });
 
         respuesta.status = 'success';
@@ -171,7 +176,7 @@ const login = async (req, res) => {
     const { email, pass } = req.body;
 
     try {
-        const user = await Usuario.findOne({ email });
+        const user = await Usuario.findOne({ where: { email } });
         if (!user) {
             respuesta.status = 'error';
             respuesta.msg = 'El usuario no existe';
@@ -193,17 +198,12 @@ const login = async (req, res) => {
 
         if (!user.emailConfirm) {
             // Generar token
-            const nwToken = new Token({
-                userId: user._id,
+            const nwToken = await Token.create({
+                userId: existeUsuario.id,
                 code: generateSixDigitToken(),
                 expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
-                used: false,
                 typeCode: tokenTypes.ACCOUNT_CONFIRMATION
-
             })
-
-            //Guardar token y usuario
-            await Promise.allSettled([nwToken.save()])
 
             emailRegistro({ email, name: user.name, token: nwToken.code });
             respuesta.status = 'error';
@@ -212,47 +212,42 @@ const login = async (req, res) => {
         }
 
         // Generar código 2FA
-        const twoFactorCode = new Token({
-            userId: user._id,
+        const twoFactorCode = Token.build({
+            userId: user.id,
             code: generateSixDigitToken(),
             expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
-            used: false,
             typeCode: tokenTypes.TWO_FACTOR
         })
 
-        //TODO:Activar envio de emails
         await emailCodigoVerificacion({ name: user.name, email: user.email, code: twoFactorCode.code })
 
         await twoFactorCode.save();
 
-
         respuesta.status = 'success';
         respuesta.msg = 'Token 2FA enviado a correo';
-        respuesta.data = user._id;
+        respuesta.data = user.id;
         return res.status(200).json(respuesta);
 
     } catch (error) {
         //console.log(error);
         if (error.isEmailError) {
-            console.log('hola');
-            console.log(req.body);
-            const user = await Usuario.findOne({ email });
+            console.log('hola, sin conexión');
+            const user = await Usuario.findOne({ where: { email } });
+
             if (user.logged) {
                 respuesta.status = 'error';
                 respuesta.msg = 'Ya tienes una sesión activa';
                 return res.status(404).json(respuesta);
             }
             // Generar código 2FA
-            const twoFactorCode = new Token({
-                userId: user._id,
+            const twoFactorCode = await Token.create({
+                userId: user.id,
                 code: generateSixDigitToken(),
                 expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
-                used: false,
                 typeCode: tokenTypes.TWO_FACTOR
             })
-            await twoFactorCode.save();
 
-            res.json({ code: user._id + ' Your code is: ' + twoFactorCode.code })
+            res.json({ code: user.id + ' Your code is: ' + twoFactorCode.code })
         } else {
             respuesta.status = 'error';
             respuesta.msg = 'Error al iniciar sesión';
@@ -266,52 +261,61 @@ const login = async (req, res) => {
 const verify2FA = async (req, res) => {
     // #swagger.tags = ['Auth']
 
-
     let respuesta = new Respuesta()
     const { code, userId } = req.body;
     try {
         const validCode = await Token.findOne({
-            userId,
-            code,
-            expiresAt: { $gt: new Date() },
-            used: false,
-            typeCode: tokenTypes.TWO_FACTOR
+            where: {
+                userId,
+                code,
+                expiresAt: { [Op.gte]: new Date() },
+                used: false,
+                typeCode: tokenTypes.TWO_FACTOR
+            }
         })
 
-        console.log(validCode)
+        const user = await Usuario.findByPk(userId);
+
         if (!validCode) {
             await crearLog({
-                nivel: NivelesLog.ERROR,
-                mensaje: `El codigo ingresado no es válido`,
-                ruta: req.originalUrl,
+                level: NivelesLog.ERROR,
+                msg: `El codigo ingresado no es válido`,
+                userEmail: user.email,
+                path: req.originalUrl,
                 ip: obtenerIP(req)
             })
             respuesta.status = 'error';
-            respuesta.msg = 'El codigo no es correcto o ya expiró';
+            respuesta.msg = 'El código no es correcto o ya expiró';
             return res.status(404).json(respuesta);
         }
         //
-        //await validCode.deleteOne()
-        //  generar JWT
+        if (user.logged) {
+            respuesta.status = 'error';
+            respuesta.msg = 'Ya tienes una sesión activa';
+            return res.status(404).json(respuesta);
+        }
 
         //TODO:Guardar ubicación
         const location = await getLocation();
-        const user = await Usuario.findOne({ _id: userId });
 
-        user.ubic.lat = location.location.lat;
-        user.ubic.lng = location.location.lng;
         user.logged = true;
-        await user.save()
 
-        await validCode.deleteOne()
+        await validCode.destroy()
+
+        //  generar JWT
         const tkn = generarJWT({ userId });
 
-        if (user.ubic.lat === location.location.lat && user.ubic.lng === location.location.lng) {
+        console.log(location, user.lat)
+        if (user.lat.toString() === location.location.lat.toString() && user.lng.toString() === location.location.lng.toString()) {
+            await user.save()
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
             respuesta.data = tkn;
             return res.status(200).json(respuesta);
         } else {
+            user.lat = location.location.lat;
+            user.lng = location.location.lng;
+            await user.save()
             respuesta.status = 'success';
             respuesta.msg = 'Has accedido desde una ubicación diferente';
             respuesta.data = tkn;
@@ -325,18 +329,21 @@ const verify2FA = async (req, res) => {
             console.log("Error en la API google");
             const tkn = generarJWT({ userId });
 
-            const user = await Usuario.findOne({ _id: userId });
+            const user = await Usuario.findByPk(userId);
+
             user.logged = true;
-            user.save()
 
             const validCode = await Token.findOne({
-                userId,
-                code,
-                expiresAt: { $gt: new Date() },
-                used: false,
-                typeCode: tokenTypes.TWO_FACTOR
-            })
-            await validCode.deleteOne()
+                where: {
+                    userId,
+                    code,
+                    expiresAt: { [Op.gte]: new Date() },
+                    used: false,
+                    typeCode: tokenTypes.TWO_FACTOR
+                }
+            });
+
+            await Promise.allSettled([user.save(), validCode.destroy()])
 
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
@@ -359,7 +366,8 @@ const logOut = async (req, res) => {
     let respuesta = new Respuesta();
     const { email } = req.body;
     try {
-        const existsUser = await Usuario.findOne({ email });
+        const existsUser = await Usuario.findOne({ where: { email } });
+        console.log(existsUser)
 
         if (!existsUser) {
             respuesta.status = 'error';
@@ -385,7 +393,6 @@ const logOut = async (req, res) => {
     }
 }
 
-
 // Funcion que genera un token para cambiar pass
 const tokenResetPassword = async (req, res) => {
     // #swagger.tags = ['Auth']
@@ -393,7 +400,7 @@ const tokenResetPassword = async (req, res) => {
     let respuesta = new Respuesta();
     try {
         const { email } = req.body;
-        const existsUser = await Usuario.findOne({ email });
+        const existsUser = await Usuario.findOne({ where: { email } });
 
         if (!existsUser) {
             respuesta.status = 'error';
@@ -402,8 +409,8 @@ const tokenResetPassword = async (req, res) => {
         }
 
         //  Generar token
-        const nwToken = new Token({
-            userId: existsUser._id,
+        const nwToken = Token.build({
+            userId: existsUser.id,
             code: generateSixDigitToken(),
             expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
             used: false,
@@ -413,7 +420,7 @@ const tokenResetPassword = async (req, res) => {
 
         //TODO:Activar el envio de emails
         //  Enviar email con token
-        //emailOlvidePass({ email, name: existsUser.name, token: nwToken.code });
+        emailOlvidePass({ email, name: existsUser.name, token: nwToken.code });
 
         await nwToken.save()
         respuesta.status = 'success';
@@ -438,10 +445,16 @@ const confirmarTokenReset = async (req, res) => {
     let respuesta = new Respuesta();
     try {
         const { token } = req.body;
-        const isValidToken = await Token.findOne({ code: token, typeCode: tokenTypes.PASSWORD_RESET });
+        const isValidToken = await Token.findOne({ where: { code: token, typeCode: tokenTypes.PASSWORD_RESET } });
         if (!isValidToken) {
             respuesta.status = 'error';
             respuesta.msg = 'El token no es válido o ya fue utilizado';
+            return res.status(400).json(respuesta);
+        }
+
+        if (isValidToken.expiresAt.getTime() <= Date.now()) {
+            respuesta.status = 'error';
+            respuesta.msg = 'El token ya expiró';
             return res.status(400).json(respuesta);
         }
 
@@ -467,7 +480,7 @@ const resetPassword = async (req, res) => {
     try {
         const { pass, token } = req.body;
 
-        const isValidToken = await Token.findOne({ code: token, typeCode: tokenTypes.PASSWORD_RESET });
+        const isValidToken = await Token.findOne({ where: { code: token, typeCode: tokenTypes.PASSWORD_RESET } });
 
         if (!isValidToken) {
             respuesta.status = 'error';
@@ -475,7 +488,13 @@ const resetPassword = async (req, res) => {
             return res.status(400).json(respuesta);
         }
 
-        const isValidUser = await Usuario.findById(isValidToken.userId);
+        if (isValidToken.expiresAt.getTime() <= Date.now()) {
+            respuesta.status = 'error';
+            respuesta.msg = 'El token ya expiró';
+            return res.status(400).json(respuesta);
+        }
+
+        const isValidUser = await Usuario.findByPk(isValidToken.userId);
 
 
         //  Nueva password
@@ -485,7 +504,7 @@ const resetPassword = async (req, res) => {
 
         isValidUser.pass = hashedPassword;
 
-        await Promise.allSettled([isValidUser.save(), isValidToken.deleteOne()]);
+        await Promise.allSettled([isValidUser.save(), isValidToken.destroy()]);
 
 
         respuesta.status = 'success';

@@ -1,13 +1,36 @@
-import mongoose from 'mongoose';
+import db from "../config/db.js";
+import { Model, DataTypes } from "sequelize";
 
-const logSchema = new mongoose.Schema({
-  nivel: { type: String, enum: ['info', 'warn', 'error'], required: true },
-  mensaje: { type: String, required: true },
-  usuario: { type: String }, // opcional: ID del usuario logueado
-  ruta: { type: String }, // opcional: la ruta donde ocurrió
-  ip: { type: String },
-  fecha: { type: Date, default: Date.now }
-});
+export class Log extends Model { }
 
-const Log =  mongoose.model('Log', logSchema);
-export default Log
+const levels = ['info', 'warn', 'error']
+
+Log.init(
+    {
+        level: {
+            type: DataTypes.ENUM(levels),
+            allowNull: false
+        },
+        msg: { 
+            type: DataTypes.STRING(150), 
+            allowNull:false
+        },
+        userEmail: { 
+            type: DataTypes.STRING(150),
+            allowNull:false 
+        },
+        path: { 
+            type: DataTypes.STRING(100)
+        }, // opcional: la ruta donde ocurrió
+        ip: { 
+            type: DataTypes.STRING 
+        },
+        date: { 
+            type: DataTypes.DATE, 
+            defaultValue: new Date()
+        }
+    },
+    {
+        sequelize:db
+    }
+);
