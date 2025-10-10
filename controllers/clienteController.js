@@ -1,9 +1,8 @@
 import { Op } from "sequelize";
-import { Proveedor, Respuesta } from "../models/index.js"
+import { Cliente, Respuesta } from "../models/index.js";
 
-export const registrarProveedor = async (req, res) => {
-    // #swagger.tags = ['Proveedor']
 
+export const registrarCliente = async (req, res) => {
     let respuesta = new Respuesta();
     const {
         nombre,
@@ -11,21 +10,20 @@ export const registrarProveedor = async (req, res) => {
         contacto
     } = req.body;
     try {
-
-        const proveedorExists = await Proveedor.findOne({
+        const clienteExists = await Cliente.findOne({
             where: {
                 [Op.or]: [{ contacto }, { telf }]
             }
         });
 
-        if (proveedorExists) {
-            if (proveedorExists.contacto === contacto) {
+        if (clienteExists) {
+            if (clienteExists.contacto === contacto) {
                 respuesta.status = 'error';
                 respuesta.msg = 'Ya existe un proveedor regitrado con este email';
                 return res.status(400).json(respuesta);
             }
 
-            if (proveedorExists.telf === telf) {
+            if (clienteExists.telf === telf) {
                 respuesta.status = 'error';
                 respuesta.msg = 'Ya existe un proveedor regitrado con este número de teléfono';
                 return res.status(400).json(respuesta);
@@ -33,13 +31,13 @@ export const registrarProveedor = async (req, res) => {
         }
 
 
-        const nwProveedor = Proveedor.build({
+        const nwCliente = Cliente.build({
             nombre,
             telf,
             contacto
         })
 
-        await nwProveedor.save()
+        await nwCliente.save()
 
         respuesta.status = 'success';
         respuesta.msg = 'Nuevo proveedor registrado';
@@ -48,24 +46,24 @@ export const registrarProveedor = async (req, res) => {
     } catch (error) {
         console.log(error);
         respuesta.status = 'error';
-        respuesta.msg = 'No se pudo registrar al proveedor';
-        return res.status(500).json(respuesta);
+        respuesta.msg = 'No se pudo registrar al ciente';
+        return res.status(500).json(respuesta)
     }
 }
 
-export const listAllProviders = async (req, res) => {
+export const listAllClientes = async (req, res) => {
     let respuesta = new Respuesta();
     try {
-        const providers = await Proveedor.findAll();
+        const clients = await Cliente.findAll();
         respuesta.status = 'success';
-        respuesta.msg = 'Listado de proveedores';
-        respuesta.data = providers;
+        respuesta.msg = 'Listado de cliente';
+        respuesta.data = clients;
         return res.status(201).json(respuesta);
     
     } catch (error) {
         console.log(error);
         respuesta.status = 'error';
-        respuesta.msg = 'No se pudieron traer a los proveedores';
+        respuesta.msg = 'No se pudieron traer a los clientes';
         return res.status(500).json(respuesta)
     }
 }
