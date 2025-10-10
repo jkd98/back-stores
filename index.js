@@ -12,7 +12,8 @@ import db from "./config/db.js";
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import productoRoutes from './routes/productoRoutes.js';
 import proveedorRoutes from './routes/proveedorRoutes.js';
-import clienteRoutes from './routes/clienteRoutes.js'
+import clienteRoutes from './routes/clienteRoutes.js';
+import movimientosRoutes from './routes/movimientosRoutes.js';
 
 // Esto va a buscar por un archivo .env
 dotenv.config();
@@ -70,7 +71,7 @@ app.use('/auth', usuarioRoutes);
 app.use('/product', productoRoutes);
 app.use('/proveedor', proveedorRoutes);
 app.use('/cliente', clienteRoutes);
-
+app.use('/movs', movimientosRoutes);
 
 // Servir documentación generada por swagger-autogen
 const swaggerUiOptions = {

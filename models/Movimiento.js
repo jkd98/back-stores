@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import db from '../config/db.js'
+import { generarId } from '../helpers/generarId.js';
 
 
 export class Movimiento extends Model { }
@@ -33,7 +34,8 @@ Movimiento.init(
         },
         referencia: {
             type: DataTypes.STRING(50),
-            allowNull: false
+            allowNull: false,
+            defaultValue: () => generarId()
         },
         id_proveedor: { // Entrada
             type: DataTypes.INTEGER,
