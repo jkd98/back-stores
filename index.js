@@ -10,6 +10,7 @@ import db from "./config/db.js";
 
 //  +++++++++++ Routes +++++++++++++++++
 import usuarioRoutes from './routes/usuarioRoutes.js';
+import productoRoutes from './routes/productoRoutes.js';
 
 // Esto va a buscar por un archivo .env
 dotenv.config();
@@ -64,6 +65,7 @@ app.use(cors(corsOptions));
 //http://tu-servidor.com/uploads/nombreArchivo.jpg
 app.use('/public/uploads', express.static('public/uploads')); // 'uploads' es la carpeta donde guardas las imágenes
 app.use('/auth', usuarioRoutes);
+app.use('/product', productoRoutes);
 
 
 // Servir documentación generada por swagger-autogen

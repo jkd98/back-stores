@@ -17,7 +17,7 @@ Usuario.init(
             allowNull: false,
             validate: {
                 is: {
-                    args: /^[a-zA-Z\s]*$/, // solo letras
+                    args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/, // solo letras
                     msg: 'Solo se admiten letras'
                 },
                 notNull: {
@@ -31,7 +31,7 @@ Usuario.init(
             allowNull: false,
             validate: {
                 is: {
-                    args: /^[a-zA-Z\s]*$/, // solo letras
+                    args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/, // solo letras
                     msg: 'Solo se admiten letras'
                 },
                 notNull: {
