@@ -37,7 +37,7 @@ export const registrarMovimiento = async (req, res) => {
 
             const nwMovimiento = Movimiento.build({
                 tipo,
-                id_producto: productExists.id,
+                id_producto: productExists.id_producto,
                 cantidad,
                 id_proveedor
             })
@@ -68,7 +68,7 @@ export const registrarMovimiento = async (req, res) => {
 
             const nwMovimiento = Movimiento.build({
                 tipo,
-                id_producto: productExists.id,
+                id_producto: productExists.id_producto,
                 cantidad,
                 id_cliente
             })

@@ -495,7 +495,7 @@
                   "tipo": {
                     "example": "any"
                   },
-                  "id_producto": {
+                  "codigo": {
                     "example": "any"
                   },
                   "cantidad": {
