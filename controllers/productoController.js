@@ -41,7 +41,7 @@ const registrarProducto = async (req, res) => {
 
         const proveedorExists = await Proveedor.findByPk(id_proveedor);
 
-        if (!productExists) {
+        if (!proveedorExists) {
             respuesta.status = 'error';
             respuesta.msg = 'El proveedor no existe';
             return res.status(400).json(respuesta);

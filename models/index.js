@@ -22,14 +22,15 @@ Usuario.hasMany(Token, {
     as: 'tokens' // Nombre de la propiedad que usarás en include/get
 });
 
+
 /// Producto - Proveedor
-Producto.belongsTo(Proveedor,{
-    foreignKey:'id_proveedor',
-    as:'proveedor'
+Producto.belongsTo(Proveedor, {
+    foreignKey: 'id_proveedor',
+    as: 'proveedor'
 })
-Proveedor.hasMany(Producto,{
-    foreignKey:'id_proveedor',
-    as:'producto'
+Proveedor.hasMany(Producto, {
+    foreignKey: 'id_proveedor',
+    as: 'producto'
 })
 
 
