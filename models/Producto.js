@@ -37,12 +37,14 @@ Producto.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             validate: {
-                min: 0
+                min: 10,
+                max:1000
             }
         },
         stock_actual: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            defaultValue:0,
             validate: {
                 min: 0
             }

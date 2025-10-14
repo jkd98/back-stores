@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, query } from "express-validator";
 
 export const validNwProduct = [
     body('codigo')
@@ -25,13 +25,21 @@ export const validNwProduct = [
         .escape(),
     body('stock_minimo')
         .toInt()
-        .isInt({ min: 0 }).withMessage('Solo se aceptan números mayores o igual a 0'),
-    body('stock_actual')
-        .toInt()
-        .isInt({ min: 0 }).withMessage('Solo se aceptan números mayores o igual a 0'),
+        .isInt({ min: 10, max: 1000 }).withMessage('Solo se aceptan números mayores a 10 y menore o igual a 1000'),
     body('id_proveedor')
         .toInt()
         .isInt({ min: 1 }).withMessage('Solo se aceptan números positivos'),
+]
+
+export const validlistAllProduct = [
+    query('page')
+        .optional()
+        .toInt()
+        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
+    query('limit')
+        .optional()
+        .toInt()
+        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
 ]
 
 export const validEditProduct = [
@@ -62,9 +70,38 @@ export const validEditProduct = [
         .notEmpty().withMessage('La unidad de medida no puede ir vacía')
         .escape(),
     body('stock_minimo')
-        .optional()
         .toInt()
-        .isInt({ min: 0 }).withMessage('Solo se aceptan números mayores o igual a 0'),
-
+        .isInt({ min: 10, max: 1000 }).withMessage('Solo se aceptan números mayores a 10 y menore o igual a 1000'),
 ]
 
+export const validFilterProducts = [
+    query('page')
+        .optional()
+        .toInt()
+        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
+    query('limit')
+        .optional()
+        .toInt()
+        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
+    body('nombre')
+        .optional()
+        .trim()
+        .notEmpty().withMessage('El nombre no puede ir vacío')
+        .isLength({ min: 3 }).withMessage('El nombre debe tener al menos 3 caracteres')
+        .escape(),
+    body('categoria')
+        .optional()
+        .trim()
+        .notEmpty().withMessage('La categoría no puede ir vacía')
+        .isLength({ min: 2 }).withMessage('La categoría debe tener al menos 2 caracteres')
+        .escape(),
+    body('proveedor')
+        .toInt()
+        .isInt({ min: 1 }).withMessage('Solo se aceptan números positivos'),
+]
+
+export const validDeleteProduct = [
+    body('codigo')
+        .toInt()
+        .isInt({ min: 1 }).withMessage('Solo se aceptan números positivos'),
+]
