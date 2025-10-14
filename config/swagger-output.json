@@ -363,17 +363,211 @@
         ],
         "description": "",
         "responses": {
+          "201": {
+            "description": "Created"
+          },
           "400": {
             "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "codigo": {
+                    "example": "any"
+                  },
+                  "nombre": {
+                    "example": "any"
+                  },
+                  "descip": {
+                    "example": "any"
+                  },
+                  "categoria": {
+                    "example": "any"
+                  },
+                  "unidad": {
+                    "example": "any"
+                  },
+                  "stock_minimo": {
+                    "example": "any"
+                  },
+                  "stock_actual": {
+                    "example": "any"
+                  },
+                  "id_proveedor": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/list": {
+      "post": {
+        "tags": [
+          "Producto"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "offset": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/edit": {
+      "post": {
+        "tags": [
+          "Producto"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "codigo": {
+                    "example": "any"
+                  },
+                  "nombre": {
+                    "example": "any"
+                  },
+                  "descip": {
+                    "example": "any"
+                  },
+                  "categoria": {
+                    "example": "any"
+                  },
+                  "unidad": {
+                    "example": "any"
+                  },
+                  "stock_minimo": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/filter": {
+      "post": {
+        "tags": [
+          "Producto"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "example": "any"
+                  },
+                  "categoria": {
+                    "example": "any"
+                  },
+                  "proveedor": {
+                    "example": "any"
+                  },
+                  "offset": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/delete": {
+      "post": {
+        "tags": [
+          "Producto"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/proveedor/": {
       "get": {
+        "tags": [
+          "Proveedor"
+        ],
         "description": "",
         "responses": {
           "201": {
@@ -424,6 +618,9 @@
     },
     "/cliente/": {
       "get": {
+        "tags": [
+          "Cliente"
+        ],
         "description": "",
         "responses": {
           "201": {
@@ -435,6 +632,9 @@
         }
       },
       "post": {
+        "tags": [
+          "Cliente"
+        ],
         "description": "",
         "responses": {
           "201": {
@@ -471,6 +671,9 @@
     },
     "/movs/": {
       "post": {
+        "tags": [
+          "Movimiento"
+        ],
         "description": "",
         "responses": {
           "201": {

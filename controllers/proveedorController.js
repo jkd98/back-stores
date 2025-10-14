@@ -54,6 +54,7 @@ export const registrarProveedor = async (req, res) => {
 }
 
 export const listAllProviders = async (req, res) => {
+    // #swagger.tags = ['Proveedor']
     let respuesta = new Respuesta();
     try {
         const providers = await Proveedor.findAll();

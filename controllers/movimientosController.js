@@ -2,6 +2,7 @@ import { Cliente, Movimiento, Producto, Proveedor, Respuesta } from "../models/i
 
 
 export const registrarMovimiento = async (req, res) => {
+    // #swagger.tags=['Movimiento']
     let respuesta = new Respuesta();
     const {
         tipo,
@@ -28,11 +29,22 @@ export const registrarMovimiento = async (req, res) => {
         }
 
         if (tipo === 'Entrada') {
+            if (!id_proveedor) {
+                respuesta.status = 'error';
+                respuesta.msg = 'Ingresa el proveedor';
+                return res.status(404).json(respuesta);
+            }
             const proveedorExists = await Proveedor.findByPk(id_proveedor);
             if (!proveedorExists) {
                 respuesta.status = 'error';
                 respuesta.msg = 'El proveedor no esta registrado';
                 return res.status(404).json(respuesta);
+            }
+
+            if (productExists.id_proveedor != id_proveedor) {
+                respuesta.status = 'error';
+                respuesta.msg = 'El producto no pertenece a este proveedor';
+                return res.status(400).json(respuesta);
             }
 
             const nwMovimiento = Movimiento.build({
@@ -53,6 +65,11 @@ export const registrarMovimiento = async (req, res) => {
         }
 
         if (tipo === 'Salida') {
+            if (!id_cliente) {
+                respuesta.status = 'error';
+                respuesta.msg = 'Ingresa el cliente';
+                return res.status(404).json(respuesta);
+            }
             const clienteExists = await Cliente.findByPk(id_cliente);
             if (!clienteExists) {
                 respuesta.status = 'error';

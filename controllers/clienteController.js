@@ -3,6 +3,7 @@ import { Cliente, Respuesta } from "../models/index.js";
 
 
 export const registrarCliente = async (req, res) => {
+    // #swagger.tags = ['Cliente']
     let respuesta = new Respuesta();
     const {
         nombre,
@@ -52,6 +53,8 @@ export const registrarCliente = async (req, res) => {
 }
 
 export const listAllClientes = async (req, res) => {
+    // #swagger.tags = ['Cliente']
+
     let respuesta = new Respuesta();
     try {
         const clients = await Cliente.findAll();
@@ -59,7 +62,7 @@ export const listAllClientes = async (req, res) => {
         respuesta.msg = 'Listado de cliente';
         respuesta.data = clients;
         return res.status(201).json(respuesta);
-    
+
     } catch (error) {
         console.log(error);
         respuesta.status = 'error';

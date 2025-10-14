@@ -13,7 +13,9 @@ Producto.init(
         },
         codigo: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            unique: true,
+
         },
         nombre: {
             type: DataTypes.STRING(200),
