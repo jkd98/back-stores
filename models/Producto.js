@@ -53,6 +53,11 @@ Producto.init(
             type: DataTypes.INTEGER,
             allowNull: true
         },
+        borrado:{
+            type:DataTypes.BOOLEAN,
+            allowNull:false,
+            defaultValue:false
+        }
 
 
     },

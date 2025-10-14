@@ -207,8 +207,9 @@ export const eliminarProductos = async (req, res) => {
             return res.status(404).json(respuesta);
         }
 
-        // TODO: Borado logico de Producto o en cascada ya que esta relacionada a Movimientos
-        await product.destroy()
+        product.borrado = true;
+
+        await product.save();
 
         respuesta.status = 'success';
         respuesta.msg = 'El producto ha sido eliminado';
