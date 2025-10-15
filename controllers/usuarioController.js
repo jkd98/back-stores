@@ -21,11 +21,17 @@ const registrarUsuario = async (req, res) => {
 
     try {
         // Verificar si el email ya está registrado
-        const existeUsuario = await Usuario.findOne({ where: { email } });
+        const existeUsuario = await Usuario.findOne({ where: { [Op.or]: [{ email }, { telf }] } });
 
-        if (existeUsuario) {
+        if (existeUsuario && existeUsuario.email === email) {
             respuesta.status = 'error';
             respuesta.msg = 'El email ya está registrado';
+            return res.status(400).json(respuesta);
+        }
+
+        if (existeUsuario && existeUsuario.telf === telf) {
+            respuesta.status = 'error';
+            respuesta.msg = 'El número de teléfono ya está registrado';
             return res.status(400).json(respuesta);
         }
 
