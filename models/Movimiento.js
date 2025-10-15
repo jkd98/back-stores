@@ -15,7 +15,7 @@ Movimiento.init(
         fecha: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: new Date()
+            defaultValue: DataTypes.NOW
         },
         tipo: {
             type: DataTypes.ENUM('Entrada', 'Salida'),

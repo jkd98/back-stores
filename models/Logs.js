@@ -27,7 +27,7 @@ Log.init(
         },
         date: { 
             type: DataTypes.DATE, 
-            defaultValue: new Date()
+            defaultValue: DataTypes.NOW
         }
     },
     {

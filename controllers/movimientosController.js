@@ -153,7 +153,15 @@ export const filtrarMovimientos = async (req, res) => {
     try {
 
         if (fecha) {
-            whers = [...whers, { fecha: { [Op.eq]: new Date(fecha)  } }];
+            const inicioDia = new Date(fecha + 'T00:00:00.000Z'); // UTC
+            const finDia = new Date(fecha + 'T23:59:59.999Z');    // UTC
+
+            whers = [...whers, {
+                fecha: {
+                    [Op.gte]: inicioDia,  // Mayor o igual al inicio del día
+                    [Op.lt]: finDia      // Menor al inicio del día siguiente
+                }
+            }];
             filters = [...filters, 'fecha'];
         }
 
@@ -187,6 +195,11 @@ export const filtrarMovimientos = async (req, res) => {
                     offset: parseInt(page - 1) * parseInt(limit)
                 }
             );
+            respuesta.status = 'success';
+            respuesta.msg = `Movimientos filtrados por ${filters.join(', ')}`
+            respuesta.data = movs;
+
+            return res.status(200).json(respuesta);
         }
 
         movs = await Movimiento.findAll(
