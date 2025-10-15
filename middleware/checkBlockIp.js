@@ -4,7 +4,7 @@ import { obtenerIP,NivelesLog } from '../helpers/crearLog.js'
 import { Op } from 'sequelize';
 
 const LIMITE_INTENTOS = 3;
-const VENTANA_TIEMPO_MIN = 3; // Tiempo que se reta a la hora actual
+const VENTANA_TIEMPO_MIN = 3; // Tiempo que se resta a la hora actual
 const BLOQUEO_MIN = 3; // Tiempo que bloquea la ip
 
 const bloqueos = new Map(); // Guarda IPs bloqueadas en memoria

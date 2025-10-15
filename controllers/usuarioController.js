@@ -48,7 +48,7 @@ const registrarUsuario = async (req, res) => {
         const nwToken = await Token.create({
             userId: nwUser.id,
             code: generateSixDigitToken(),
-            expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
             typeCode: tokenTypes.ACCOUNT_CONFIRMATION
         })
 
@@ -147,7 +147,7 @@ const generarTokenConfirm = async (req, res) => {
         const nwToken = await Token.create({
             userId: existeUsuario.id,
             code: generateSixDigitToken(),
-            expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
             typeCode: tokenTypes.ACCOUNT_CONFIRMATION
         })
 
@@ -201,7 +201,7 @@ const login = async (req, res) => {
             const nwToken = await Token.create({
                 userId: existeUsuario.id,
                 code: generateSixDigitToken(),
-                expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
                 typeCode: tokenTypes.ACCOUNT_CONFIRMATION
             })
 
@@ -215,7 +215,7 @@ const login = async (req, res) => {
         const twoFactorCode = Token.build({
             userId: user.id,
             code: generateSixDigitToken(),
-            expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
             typeCode: tokenTypes.TWO_FACTOR
         })
 
@@ -243,7 +243,7 @@ const login = async (req, res) => {
             const twoFactorCode = await Token.create({
                 userId: user.id,
                 code: generateSixDigitToken(),
-                expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
                 typeCode: tokenTypes.TWO_FACTOR
             })
 
@@ -412,7 +412,7 @@ const tokenResetPassword = async (req, res) => {
         const nwToken = Token.build({
             userId: existsUser.id,
             code: generateSixDigitToken(),
-            expiresAt: Date.now() + 5 * 60 * 1000,  // -> 300,000 milisegundos (5 minutos)
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
             used: false,
             typeCode: tokenTypes.PASSWORD_RESET
 
