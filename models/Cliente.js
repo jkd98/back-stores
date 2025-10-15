@@ -39,6 +39,11 @@ Cliente.init(
         contacto: {
             type: DataTypes.STRING(200),
             allowNull: false
+        },
+        disable: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     },
     {

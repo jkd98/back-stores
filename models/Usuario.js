@@ -4,7 +4,6 @@ import db from "../config/db.js";
 export class Usuario extends Model { }
 
 
-//TODO: Investigar si solo ocupo la clase para instanciar un objeto y guardarlo en la DB
 Usuario.init(
     {
         id: {

@@ -207,6 +207,12 @@ export const eliminarProductos = async (req, res) => {
             return res.status(404).json(respuesta);
         }
 
+        if(product.borrado){
+            respuesta.status = 'error';
+            respuesta.msg = 'El producto ya ha sido borrado';
+            return res.status(404).json(respuesta);
+        }
+
         product.borrado = true;
 
         await product.save();

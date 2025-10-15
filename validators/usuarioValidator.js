@@ -5,29 +5,26 @@ export const validarRegistro = [
   body('name')
     .trim() // Elimina espacios al inicio/final
     .notEmpty().withMessage('El nombre es obligatorio')
+    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/).withMessage('El nombre solo puede contener letras y espacios')
     .isLength({ min: 2 }).withMessage('El nombre debe tener al menos 2 caracteres')
     .escape(),
-
-
   // Valida 'lastN' (apellido)
   body('lastN')
     .trim()
     .notEmpty().withMessage('El apellido es obligatorio')
+    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/).withMessage('El nombre solo puede contener letras y espacios')
     .isLength({ min: 2 }).withMessage('El apellido debe tener al menos 2 caracteres')
     .escape(),
-
   // Valida 'email'
   body('email')
     .trim()
     .notEmpty().withMessage('El email es obligatorio')
     .isEmail().withMessage('Debe ser un email válido')
     .normalizeEmail(), // Convierte a minúsculas y limpia formato
-
   body('telf')
     .trim()
     .notEmpty().withMessage('El número de celular es obligatorio')
     .escape(),
-
   // Valida 'pass' (contraseña)
   body('pass')
     .trim()
