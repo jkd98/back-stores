@@ -63,7 +63,7 @@ export const listAllClientes = async (req, res) => {
     const { page = 1, limit = 5 } = req.query;
     try {
         const clients = await Cliente.findAll(
-            { limit, offset: parseInt(page - 1) * parseInt(limit) }
+            { limit: parseInt(limit), offset: parseInt(page - 1) * parseInt(limit) }
         );
         respuesta.status = 'success';
         respuesta.msg = 'Listado de clientes';

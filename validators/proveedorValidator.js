@@ -21,18 +21,6 @@ export const validNwProveedor = [
         .escape()
 ]
 
-
-export const validlistAllProvider = [
-    query('page')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
-    query('limit')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
-]
-
 export const validEditProveedor = [
     body('id_proveedor')
         .toInt()

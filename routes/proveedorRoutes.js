@@ -1,5 +1,6 @@
 import express from 'express';
-import { validEditProveedor, validEliminarProveedor, validlistAllProvider, validNwProveedor } from '../validators/proveedorValidator.js';
+import { validEditProveedor, validEliminarProveedor, validNwProveedor } from '../validators/proveedorValidator.js';
+import { validPagination } from '../validators/gnrlValidator.js';
 import { manejarErrores } from '../middleware/manejadorErrores.js';
 import {
     editarProveedor,
@@ -11,7 +12,7 @@ import {
 
 const router = express.Router();
 
-router.get('/', validlistAllProvider, manejarErrores, listAllProviders);
+router.get('/', validPagination, manejarErrores, listAllProviders);
 router.post('/', validNwProveedor, manejarErrores, registrarProveedor);
 router.post('/edit', validEditProveedor, manejarErrores, editarProveedor);
 router.post('/delete', validEliminarProveedor, manejarErrores, eliminarProveedor);

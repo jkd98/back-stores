@@ -21,18 +21,6 @@ export const validNwCliente = [
         .escape()
 ]
 
-
-export const validlistAllClient = [
-    query('page')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
-    query('limit')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
-]
-
 export const validEditClient = [
     body('id_cliente')
         .toInt()

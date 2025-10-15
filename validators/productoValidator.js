@@ -1,4 +1,4 @@
-import { body, query } from "express-validator";
+import { body } from "express-validator";
 
 export const validNwProduct = [
     body('codigo')
@@ -29,17 +29,6 @@ export const validNwProduct = [
     body('id_proveedor')
         .toInt()
         .isInt({ min: 1 }).withMessage('Solo se aceptan números positivos'),
-]
-
-export const validlistAllProduct = [
-    query('page')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
-    query('limit')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
 ]
 
 export const validEditProduct = [
@@ -75,14 +64,6 @@ export const validEditProduct = [
 ]
 
 export const validFilterProducts = [
-    query('page')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
-    query('limit')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
     body('nombre')
         .optional()
         .trim()

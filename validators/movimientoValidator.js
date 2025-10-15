@@ -20,3 +20,7 @@ export const validNwMovimiento = [
         .toInt()
         .isInt({ min: 1 }).withMessage('El id debe ser válido')
 ]
+
+export const validFilter = [
+    body('')
+]

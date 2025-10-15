@@ -73,7 +73,9 @@ export const listAllProducts = async (req, res) => {
     const { page = 1, limit = 5 } = req.query;
     let respuesta = new Respuesta();
     try {
-        const products = await Producto.findAll({ limit, offset: parseInt(page - 1) * parseInt(limit) });
+        const products = await Producto.findAll(
+            { limit: parseInt(limit), offset: parseInt(page - 1) * parseInt(limit) }
+        );
 
         respuesta.status = 'success';
         respuesta.msg = 'Listado de productos'
@@ -173,7 +175,7 @@ export const filtrarProductos = async (req, res) => {
             products = await Producto.findAll(
                 {
                     where: {},
-                    limit,
+                    limit: parseInt(limit),
                     offset: parseInt(page - 1) * parseInt(limit)
                 }
             );
@@ -207,7 +209,7 @@ export const eliminarProductos = async (req, res) => {
             return res.status(404).json(respuesta);
         }
 
-        if(product.borrado){
+        if (product.borrado) {
             respuesta.status = 'error';
             respuesta.msg = 'El producto ya ha sido borrado';
             return res.status(404).json(respuesta);
