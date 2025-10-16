@@ -144,6 +144,8 @@ export const listAllMovs = async (req, res) => {
  * Función para filtrar movimientos
  */
 export const filtrarMovimientos = async (req, res) => {
+    // #swagger.tags = ['Movimiento']
+
     let respuesta = new Respuesta();
     const { page = 1, limit = 5 } = req.query;
     const { fecha, tipo, proveedor, cliente, producto } = req.body;
