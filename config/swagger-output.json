@@ -379,9 +379,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "codigo": {
-                    "example": "any"
-                  },
                   "nombre": {
                     "example": "any"
                   },
@@ -973,6 +970,9 @@
     },
     "/movs/filter": {
       "post": {
+        "tags": [
+          "Movimiento"
+        ],
         "description": "",
         "parameters": [
           {

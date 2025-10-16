@@ -1,9 +1,6 @@
 import { body } from "express-validator";
 
 export const validNwProduct = [
-    body('codigo')
-        .toInt()
-        .isInt({ min: 0 }).withMessage('Solo se aceptan números mayores o igual a 0'),
     body('nombre')
         .trim()
         .notEmpty().withMessage('El nombre es obligatorio')

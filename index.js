@@ -6,7 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerOutput from './config/swagger-output.json' with { type: 'json' };
 
 //  +++++++++++ Modulos ++++++++++++++++
-import db from "./config/db.js";
+import db, { connectDB } from "./config/db.js";
 
 //  +++++++++++ Routes +++++++++++++++++
 import usuarioRoutes from './routes/usuarioRoutes.js';
@@ -14,6 +14,7 @@ import productoRoutes from './routes/productoRoutes.js';
 import proveedorRoutes from './routes/proveedorRoutes.js';
 import clienteRoutes from './routes/clienteRoutes.js';
 import movimientosRoutes from './routes/movimientosRoutes.js';
+import { alertaStockMinimo } from './helpers/tareaProgramada.js';
 
 // Esto va a buscar por un archivo .env
 dotenv.config();
@@ -26,24 +27,17 @@ app.use(express.json()); // para que procese informacion json correctamente
 // Puerto 
 const port = process.env.PORT || 3000;
 
-// conectar a la base de datos
-export async function connectDB() {
-    try {
-        await db.authenticate()
-        await db.sync() // para poder agregar nuevas columnas
-        console.log("Conexión exitosa a DB"); //--Se comenta para evitar warnings en las pruebas
-    } catch (error) {
-        console.log(error);
-        console.log("error al conectarse a DB")
-    }
-}
+// Conectarse a la db
 connectDB();
 
-// Configurar CORS
+// Tarea Programada
+alertaStockMinimo;
 
+// Configurar CORS
 // Dominios Permitidos
 const whiteList = [
-    process.env.E_FRONT, process.env.TEST_BACK
+    process.env.E_FRONT, 
+    process.env.TEST_BACK
 ];
 
 const corsOptions = {

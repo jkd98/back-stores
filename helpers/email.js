@@ -1,15 +1,15 @@
 import nodemailer from 'nodemailer';
 
+const transport = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
 const emailRegistro = async (datos) => {
-    // Looking to send emails in production? Check out our Email API/SMTP product!
-    const transport = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
     //console.log(datos);
     const { email, name, token } = datos;
     const domainn = 'EventStar.com'
@@ -38,55 +38,10 @@ const emailRegistro = async (datos) => {
 
 };
 
-const emailNuevoToken = async (datos) => {
-    // Looking to send emails in production? Check out our Email API/SMTP product!
-    const transport = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
-    //console.log(datos);
-    const { email, name, token } = datos;
-    const domainn = 'EventStar.com'
-
-    const subject = `Confirma tu Cuenta en ${domainn}`;
-    const text = `Confirma tu Cuenta en ${domainn} ahora:`;
-    const reff = process.env.E_FRONT;
-    const html = `
-        <p>Hola ${name}.</p>
-        <p>Este es tu nuevo código: ${token}</p>
-        <p>Este código expirará en 5 minutos.</p>
-
-    `;
-    //Enviar
-    const response = await transport.sendMail({
-        from: domainn, //quie?
-        to: email, //para quien?
-        subject, //asunto
-        text,
-        html
-    })
-
-    return response;
-
-};
-
 const emailOlvidePass = async (datos) => {
-    const transport = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
     //console.log(datos);
     const { email, name, token } = datos;
     const domainn = 'EventStar.com'
-
 
     const subject = `Reestablece tu password en ${domainn}`;
     const text = `Reestablece tu password en ${domainn} ahora:`;
@@ -111,14 +66,6 @@ const emailOlvidePass = async (datos) => {
 };
 
 const emailCodigoVerificacion = async ({ email, name, code }) => {
-    const transport = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
     const domainn = 'EventStar.com'
 
 
@@ -149,10 +96,50 @@ const emailCodigoVerificacion = async ({ email, name, code }) => {
 
 };
 
+const emailAlerta = async (datos) => {
+    //console.log(datos);
+    const { email = 'email1@email.com', name = 'Admin', productos } = datos;
+
+    let productosHTML = '';
+
+    for (const element of productos) {
+        productosHTML = productosHTML + `
+            \n
+            <li>
+                <div>
+                    <p>Nombre: ${element.nombre}</p>
+                    <p>Código: ${element.codigo}</p>
+                    <p>Categoría: ${element.categoria}</p>
+                    <p>Stock actual: ${element.stock_actual}</p>   
+                </div>
+            </li>
+        `
+    }
+
+    const domainn = 'EventStar.com'
+    const subject = `Confirma tu Cuenta en ${domainn}`;
+    const text = `Confirma tu Cuenta en ${domainn} ahora:`;
+    const html = `
+        <p>Hola ${name}.</p>
+        <p>Estos productos están por debajo del estock mínimo establecido:</p>
+        <ul>${productosHTML}</ul>
+    `;
+    //Enviar
+    const response = await transport.sendMail({
+        from: domainn, //quie?
+        to: email, //para quien?
+        subject, //asunto
+        text,
+        html
+    })
+
+    return response;
+
+};
 
 export {
     emailRegistro,
     emailOlvidePass,
-    emailCodigoVerificacion
-    
+    emailCodigoVerificacion,
+    emailAlerta
 }

@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { Movimiento, Producto, Proveedor, Respuesta } from "../models/index.js"
+import { generateTenDigitCode } from "../helpers/genSixDigitToken.js";
 
 /**
  * Función que registra un nuevo producto con cantidad igual a cero (0)
@@ -8,7 +9,6 @@ export const registrarProducto = async (req, res) => {
     // #swagger.tags = ['Producto']
     let respuesta = new Respuesta();
     const {
-        codigo,
         nombre,
         descip,
         categoria,
@@ -18,13 +18,7 @@ export const registrarProducto = async (req, res) => {
     } = req.body;
 
     try {
-        const productExists = await Producto.findOne({ where: { codigo } });
-        if (productExists) {
-            respuesta.status = 'error';
-            respuesta.msg = 'Ya hay un producto registrado con ese código';
-            return res.status(400).json(respuesta);
-        }
-
+        
         const proveedorExists = await Proveedor.findByPk(id_proveedor);
 
         if (!proveedorExists) {
@@ -35,7 +29,7 @@ export const registrarProducto = async (req, res) => {
 
 
         const nwProduct = Producto.build({
-            codigo,
+            codigo: await generateTenDigitCode(),
             nombre,
             descip,
             categoria,

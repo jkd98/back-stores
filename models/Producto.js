@@ -12,10 +12,9 @@ Producto.init(
             autoIncrement: true
         },
         codigo: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING(11),
             allowNull: false,
             unique: true,
-
         },
         nombre: {
             type: DataTypes.STRING(200),
@@ -38,13 +37,13 @@ Producto.init(
             allowNull: false,
             validate: {
                 min: 10,
-                max:1000
+                max: 1000
             }
         },
         stock_actual: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            defaultValue:0,
+            defaultValue: 0,
             validate: {
                 min: 0
             }
@@ -53,10 +52,10 @@ Producto.init(
             type: DataTypes.INTEGER,
             allowNull: true
         },
-        borrado:{
-            type:DataTypes.BOOLEAN,
-            allowNull:false,
-            defaultValue:false
+        borrado: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
 
 
