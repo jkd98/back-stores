@@ -98,7 +98,7 @@ const emailCodigoVerificacion = async ({ email, name, code }) => {
 
 const emailAlerta = async (datos) => {
     //console.log(datos);
-    const { email = 'email1@email.com', name = 'Admin', productos } = datos;
+    const { email, name, productos } = datos;
 
     let productosHTML = '';
 
