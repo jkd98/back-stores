@@ -74,6 +74,7 @@ export const validFilterProducts = [
         .isLength({ min: 2 }).withMessage('La categoría debe tener al menos 2 caracteres')
         .escape(),
     body('proveedor')
+        .optional()
         .toInt()
         .isInt({ min: 1 }).withMessage('Solo se aceptan números positivos'),
 ]
