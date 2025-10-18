@@ -98,31 +98,39 @@ const emailCodigoVerificacion = async ({ email, name, code }) => {
 
 const emailAlerta = async (datos) => {
     //console.log(datos);
-    const { email, name, productos } = datos;
+    const { email = 'admin@email.com', name = 'Administrador', productos } = datos;
 
     let productosHTML = '';
 
     for (const element of productos) {
         productosHTML = productosHTML + `
             \n
-            <li>
-                <div>
-                    <p>Nombre: ${element.nombre}</p>
-                    <p>Código: ${element.codigo}</p>
-                    <p>Categoría: ${element.categoria}</p>
-                    <p>Stock actual: ${element.stock_actual}</p>   
-                </div>
-            </li>
+            
+            <tr style="background-color: #5887c4ff; color:white;">
+                <td>${element.nombre}</td>
+                <td>${element.codigo}</td>
+                <td>${element.categoria}</td>
+                <td>${element.stock_actual}</td>   
+            </tr>
+            
         `
     }
 
     const domainn = 'EventStar.com'
-    const subject = `Confirma tu Cuenta en ${domainn}`;
-    const text = `Confirma tu Cuenta en ${domainn} ahora:`;
+    const subject = `Productos apunto de agotarse`;
+    const text = `Alerta de productos por debajo del stock mínimo`;
     const html = `
         <p>Hola ${name}.</p>
         <p>Estos productos están por debajo del estock mínimo establecido:</p>
-        <ul>${productosHTML}</ul>
+        <table style="text-align:center;">
+            <tr style="background-color: #013477ff; color:#FFF; font-size:bold;">
+                <th>Nombre</th>
+                <th>Código</th>
+                <th>Categoría</th>
+                <th>Stock actual</th>
+            </tr>
+            ${productosHTML}
+        </table>
     `;
     //Enviar
     const response = await transport.sendMail({

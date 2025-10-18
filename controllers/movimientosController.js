@@ -1,6 +1,8 @@
 import { Op } from "sequelize";
 import { Cliente, Movimiento, Producto, Proveedor, Respuesta } from "../models/index.js";
+import { emailAlerta } from "../helpers/email.js";
 
+//#region registraMovimeito
 /**
  * Función para registrar movimientos de entrada o salida
  */
@@ -16,13 +18,13 @@ export const registrarMovimiento = async (req, res) => {
 
     try {
 
-        if (!(tipo.toLowerCase() === 'entrada' || tipo === 'salida')) {
+        if (!(tipo.toLowerCase() === 'entrada' || tipo.toLowerCase() === 'salida')) {
             respuesta.status = 'error';
             respuesta.msg = 'El tipo de movimiento no es válido, intente otra vez';
             return res.status(404).json(respuesta);
         }
 
-        const productExists = await Producto.findOne({ where: { codigo } });
+        const productExists = await Producto.findOne({ where: { codigo }, include: { model: Proveedor, as: 'proveedor' } });
 
         if (!productExists) {
             respuesta.status = 'error';
@@ -51,10 +53,10 @@ export const registrarMovimiento = async (req, res) => {
             }
 
             const nwMovimiento = Movimiento.build({
-                tipo,
+                tipo:tipo.toLowerCase()==='entrada'&&'Entrada',
                 id_producto: productExists.id_producto,
                 cantidad,
-                id_proveedor:responsable
+                id_proveedor: responsable
             })
             productExists.stock_actual += cantidad;
 
@@ -82,16 +84,20 @@ export const registrarMovimiento = async (req, res) => {
             }
 
             const nwMovimiento = Movimiento.build({
-                tipo,
+                tipo:tipo.toLowerCase()==='salida'&&'Salida',
                 id_producto: productExists.id_producto,
                 cantidad,
-                id_cliente:responsable
+                id_cliente: responsable
             })
             productExists.stock_actual -= cantidad;
 
             Promise.allSettled([await nwMovimiento.save(), await productExists.save()]);
 
-            respuesta.status = 'success';
+            if (productExists.stock_actual < productExists.stock_minimo){
+                await emailAlerta({productos:[productExists]})
+            }
+
+                respuesta.status = 'success';
             respuesta.msg = 'El movimiento de salida a sido completado';
             respuesta.data = nwMovimiento;
             res.status(201).json(respuesta);
@@ -104,6 +110,8 @@ export const registrarMovimiento = async (req, res) => {
         return res.status(500).json(respuesta);
     }
 }
+//#endregion
+
 
 /**
  * Función para listar todos los movimientos con paginación
