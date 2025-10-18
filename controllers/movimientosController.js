@@ -11,13 +11,12 @@ export const registrarMovimiento = async (req, res) => {
         tipo,
         codigo,
         cantidad,
-        id_proveedor,
-        id_cliente
+        responsable
     } = req.body;
 
     try {
 
-        if (!(tipo === 'Entrada' || tipo === 'Salida')) {
+        if (!(tipo.toLowerCase() === 'entrada' || tipo === 'salida')) {
             respuesta.status = 'error';
             respuesta.msg = 'El tipo de movimiento no es válido, intente otra vez';
             return res.status(404).json(respuesta);
@@ -37,20 +36,15 @@ export const registrarMovimiento = async (req, res) => {
             return res.status(400).json(respuesta);
         }
 
-        if (tipo === 'Entrada') {
-            if (!id_proveedor) {
-                respuesta.status = 'error';
-                respuesta.msg = 'Ingresa el proveedor';
-                return res.status(400).json(respuesta);
-            }
-            const proveedorExists = await Proveedor.findByPk(id_proveedor);
+        if (tipo.toLowerCase() === 'entrada') {
+            const proveedorExists = await Proveedor.findByPk(responsable);
             if (!proveedorExists) {
                 respuesta.status = 'error';
                 respuesta.msg = 'El proveedor no esta registrado';
                 return res.status(404).json(respuesta);
             }
 
-            if (productExists.id_proveedor != id_proveedor) {
+            if (productExists.id_proveedor != responsable) {
                 respuesta.status = 'error';
                 respuesta.msg = 'El producto no pertenece a este proveedor';
                 return res.status(400).json(respuesta);
@@ -60,7 +54,7 @@ export const registrarMovimiento = async (req, res) => {
                 tipo,
                 id_producto: productExists.id_producto,
                 cantidad,
-                id_proveedor
+                id_proveedor:responsable
             })
             productExists.stock_actual += cantidad;
 
@@ -73,13 +67,8 @@ export const registrarMovimiento = async (req, res) => {
 
         }
 
-        if (tipo === 'Salida') {
-            if (!id_cliente) {
-                respuesta.status = 'error';
-                respuesta.msg = 'Ingresa el cliente';
-                return res.status(400).json(respuesta);
-            }
-            const clienteExists = await Cliente.findByPk(id_cliente);
+        if (tipo.toLowerCase() === 'salida') {
+            const clienteExists = await Cliente.findByPk(responsable);
             if (!clienteExists) {
                 respuesta.status = 'error';
                 respuesta.msg = 'El cliente no existe';
@@ -96,7 +85,7 @@ export const registrarMovimiento = async (req, res) => {
                 tipo,
                 id_producto: productExists.id_producto,
                 cantidad,
-                id_cliente
+                id_cliente:responsable
             })
             productExists.stock_actual -= cantidad;
 

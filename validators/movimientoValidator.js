@@ -6,19 +6,18 @@ export const validNwMovimiento = [
         .notEmpty().withMessage('El tipo de movimiento es obligatorio')
         .escape(),
     body('codigo')
-        .toInt()
-        .isInt({ min: 1 }).withMessage('El id debe ser válido'),
+        .trim()
+        .notEmpty().withMessage('El código no es válido')
+        .isNumeric().withMessage('Solo se admiten números')
+        .isLength({ min: 10 }).withMessage('El código debe de tener 10 digitos')
+        .escape(),
     body('cantidad')
         .toInt()
         .isInt({ min: 1 }).withMessage('La cantidad debe ser mayor que 0'),
-    body('id_proveedor')
+    body('responsable')
         .optional()
         .toInt()
         .isInt({ min: 1 }).withMessage('El id debe ser válido'),
-    body('id_cliente')
-        .optional()
-        .toInt()
-        .isInt({ min: 1 }).withMessage('El id debe ser válido')
 ]
 
 
@@ -28,44 +27,44 @@ export const validFilter = [
         .optional()
         .trim() // Elimina espacios en blanco
         .escape() // Convierte caracteres HTML peligrosos
-        .isDate({ 
+        .isDate({
             format: 'YYYY-MM-DD',
             delimiters: ['-'],
-            strictMode: true 
+            strictMode: true
         })
         .withMessage('Formato de fecha inválido. Use YYYY-MM-DD'),
-    
+
     body('tipo')
         .optional()
         .trim()
         .escape()
         .isIn(['Entrada', 'Salida'])
         .withMessage('El tipo debe ser Entrada o Salida'),
-    
+
     body('id_producto')
         .optional()
         .isInt({ min: 1 })
         .withMessage('ID de producto inválido')
         .toInt(), // Convierte a número entero
-    
+
     body('cantidad')
         .optional()
         .isInt({ min: 1 })
         .withMessage('La cantidad debe ser un número entero mayor a 0')
         .toInt(),
-    
+
     body('id_proveedor')
         .optional()
         .isInt({ min: 1 })
         .withMessage('ID de proveedor inválido')
         .toInt(),
-    
+
     body('id_cliente')
         .optional()
         .isInt({ min: 1 })
         .withMessage('ID de cliente inválido')
         .toInt(),
-    
+
     body('referencia')
         .optional()
         .trim()
