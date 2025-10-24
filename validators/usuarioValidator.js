@@ -4,17 +4,17 @@ export const validarRegistro = [
   // Sanitiza y valida 'name' (elimina espacios, verifica que no esté vacío)
   body('name')
     .trim() // Elimina espacios al inicio/final
+    .escape()
     .notEmpty().withMessage('El nombre es obligatorio')
     .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/).withMessage('El nombre solo puede contener letras y espacios')
-    .isLength({ min: 2 }).withMessage('El nombre debe tener al menos 2 caracteres')
-    .escape(),
+    .isLength({ min: 2 }).withMessage('El nombre debe tener al menos 2 caracteres'),
   // Valida 'lastN' (apellido)
   body('lastN')
     .trim()
+    .escape()
     .notEmpty().withMessage('El apellido es obligatorio')
     .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/).withMessage('El nombre solo puede contener letras y espacios')
-    .isLength({ min: 2 }).withMessage('El apellido debe tener al menos 2 caracteres')
-    .escape(),
+    .isLength({ min: 2 }).withMessage('El apellido debe tener al menos 2 caracteres'),
   // Valida 'email'
   body('email')
     .trim()
@@ -23,8 +23,8 @@ export const validarRegistro = [
     .normalizeEmail(), // Convierte a minúsculas y limpia formato
   body('telf')
     .trim()
-    .notEmpty().withMessage('El número de celular es obligatorio')
-    .escape(),
+    .escape()
+    .notEmpty().withMessage('El número de celular es obligatorio'),
   // Valida 'pass' (contraseña)
   body('pass')
     .trim()
@@ -44,8 +44,8 @@ export const validConfirmAccount = [
   // Valida 'email'
   body('token')
     .trim()
-    .notEmpty().withMessage('El token es obligatorio')
     .escape()
+    .notEmpty().withMessage('El token es obligatorio')
 ];
 
 export const validarNuevoTknConfirm = [
@@ -75,9 +75,13 @@ export const validarLogin = [
 
 export const validar2FAData = [
   body('userId')
+    .toInt()
+    .isInt({ min: 1 }).withMessage('Solo se aceptan numeros mayores o igual a 1'),
+  body('code')
     .trim()
-    .notEmpty().withMessage('El ID del usuario es obligatorio')
     .escape()
+    .notEmpty().withMessage('El código no es válido')
+    .isNumeric().withMessage('Solo se admiten números')
 ]
 
 export const validarLogOut = [

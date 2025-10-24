@@ -23,7 +23,7 @@ import { emailAlerta } from "./email.js";
  * los dias para revisar que productos estan por debajo del stock mínimo
  * y enviar un email con la lista de los productos.
  */
-export const alertaStockMinimo = scheduleJob('0 */1 * * * *', async () => {
+export const alertaStockMinimo = scheduleJob('0 0 0 * * *', async () => {
     console.log("Tarea programada")
     try {
         const productos = await Producto.findAll({ where: { borrado: false }, include: { model: Proveedor, as: 'proveedor' } });

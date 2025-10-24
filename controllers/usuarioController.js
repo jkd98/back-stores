@@ -60,18 +60,16 @@ const registrarUsuario = async (req, res) => {
 
 
         //TODO: Activar el envio de emails
-        emailRegistro({ email, name, token: nwToken.code });
+        //emailRegistro({ email, name, token: nwToken.code });
 
         respuesta.status = 'success';
         respuesta.msg = 'Registro completado, confirma tu cuenta para activarla';
-        respuesta.data = null;
         return res.status(201).json(respuesta);
 
     } catch (error) {
         console.log(error);
         respuesta.status = 'error';
         respuesta.msg = 'Error al registrar el usuario';
-        respuesta.data = error.message;
         return res.status(500).json(respuesta);
     }
 };
@@ -113,14 +111,12 @@ const confirmarCuenta = async (req, res) => {
 
         respuesta.status = 'success';
         respuesta.msg = 'Cuenta confirmada, ya puedes iniciar sesión';
-        respuesta.data = null;
         return res.status(201).json(respuesta);
 
     } catch (error) {
         console.log(error);
         respuesta.status = 'error';
         respuesta.msg = 'Error al confirmar la cuenta';
-        respuesta.data = error.message;
         return res.status(500).json(respuesta);
     }
 }
@@ -158,18 +154,16 @@ const generarTokenConfirm = async (req, res) => {
         })
 
         // TODO: Habilitar el envio de emails
-        emailRegistro({ email, name: existeUsuario.name, token: nwToken.code });
+        //emailRegistro({ email, name: existeUsuario.name, token: nwToken.code });
 
         respuesta.status = 'success';
         respuesta.msg = 'Nuevo token enviado al email';
-        respuesta.data = null;
         return res.status(201).json(respuesta);
 
     } catch (error) {
         console.log(error);
         respuesta.status = 'error';
         respuesta.msg = 'Error al generar el token';
-        respuesta.data = error.message;
         return res.status(500).json(respuesta);
     }
 }
@@ -193,13 +187,13 @@ const login = async (req, res) => {
         if (!passCorrecto) {
             respuesta.status = 'error';
             respuesta.msg = 'Password incorrecto';
-            return res.status(404).json(respuesta);
+            return res.status(401).json(respuesta);
         }
 
         if (user.logged) {
             respuesta.status = 'error';
             respuesta.msg = 'Ya tienes una sesión activa';
-            return res.status(404).json(respuesta);
+            return res.status(401).json(respuesta);
         }
 
         if (!user.emailConfirm) {
@@ -214,7 +208,7 @@ const login = async (req, res) => {
             emailRegistro({ email, name: user.name, token: nwToken.code });
             respuesta.status = 'error';
             respuesta.msg = 'La cuenta no ha sido confirmada. Se ha enviado un codigo de confirmación a tu email';
-            return res.status(404).json(respuesta);
+            return res.status(401).json(respuesta);
         }
 
         // Generar código 2FA
@@ -225,13 +219,13 @@ const login = async (req, res) => {
             typeCode: tokenTypes.TWO_FACTOR
         })
 
-        await emailCodigoVerificacion({ name: user.name, email: user.email, code: twoFactorCode.code })
+        //await emailCodigoVerificacion({ name: user.name, email: user.email, code: twoFactorCode.code })
 
         await twoFactorCode.save();
 
         respuesta.status = 'success';
         respuesta.msg = 'Token 2FA enviado a correo';
-        respuesta.data = user.id;
+        respuesta.data = {userId:user.id};
         return res.status(200).json(respuesta);
 
     } catch (error) {
@@ -253,7 +247,10 @@ const login = async (req, res) => {
                 typeCode: tokenTypes.TWO_FACTOR
             })
 
-            res.json({ code: user.id + ' Your code is: ' + twoFactorCode.code })
+            respuesta.status='success';
+            respuesta.msg='token de verificación en dos pasos';
+            respuesta.data={ userId: user.id, code: twoFactorCode.code };
+            res.json(respuesta)
         } else {
             respuesta.status = 'error';
             respuesta.msg = 'Error al iniciar sesión';
@@ -316,15 +313,19 @@ const verify2FA = async (req, res) => {
             await user.save()
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
-            respuesta.data = tkn;
+            respuesta.data = {tkn,user};
             return res.status(200).json(respuesta);
         } else {
             user.lat = location.location.lat;
             user.lng = location.location.lng;
             await user.save()
             respuesta.status = 'success';
-            respuesta.msg = 'Has accedido desde una ubicación diferente';
-            respuesta.data = tkn;
+            respuesta.msg = 'Has accedido desde una nueva ubicación';
+            respuesta.data = {tkn,user:{
+                name: `${user.name} ${user.lastN}`,
+                email: user.email,
+                role: user.role
+            }};
             return res.status(200).json(respuesta);
         }
 
@@ -353,7 +354,11 @@ const verify2FA = async (req, res) => {
 
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
-            respuesta.data = tkn;
+            respuesta.data = {tkn,user:{
+                name: `${user.name} ${user.lastN}`,
+                email: user.email,
+                role: user.role
+            }};
             return res.status(200).json(respuesta);
         } else {
             respuesta.status = 'error';
@@ -439,7 +444,6 @@ const tokenResetPassword = async (req, res) => {
 
         respuesta.status = 'error';
         respuesta.msg = 'Error al generar el token';
-        respuesta.data = error.message;
         return res.status(500).json(respuesta);
     }
 }
@@ -473,7 +477,6 @@ const confirmarTokenReset = async (req, res) => {
 
         respuesta.status = 'error';
         respuesta.msg = 'Error al verficar el token';
-        respuesta.data = error.message;
         return res.status(500).json(respuesta);
     }
 }
@@ -522,7 +525,6 @@ const resetPassword = async (req, res) => {
 
         respuesta.status = 'error';
         respuesta.msg = 'Error al cambiar el password';
-        respuesta.data = error.message;
         return res.status(500).json(respuesta);
     }
 }
