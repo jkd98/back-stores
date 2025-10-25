@@ -81,3 +81,6 @@ app.listen(port, () => {
     // http://localhost:3050/
     console.log(`Server is running on http://localhost:${port}`);
 });
+
+
+export default app
