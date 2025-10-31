@@ -108,5 +108,10 @@ export const validarNwPass = [
     .matches(/[A-Z]/).withMessage('Debe contener al menos una mayúscula')
     .matches(/[0-9]/).withMessage('Debe contener al menos un número')
     .matches(/[-_!@#$%^&*()+={};:,.<>?~]/).withMessage('Debe contener un carácter especial'),
+  // Valida 'email'
+  body('token')
+    .trim()
+    .escape()
+    .notEmpty().withMessage('El token es obligatorio')
 ];
 

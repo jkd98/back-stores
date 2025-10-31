@@ -4,14 +4,7 @@ import dotenv from 'dotenv';
 
 
 dotenv.config()
-/*
-dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false
-        }
-    },
-*/
+
 const db = new Sequelize({
     database: process.env.DATABASE,
     username: process.env.DB_USER,
@@ -23,7 +16,6 @@ const db = new Sequelize({
     },
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    //models: [Product],
     logging: false, //--para evitar warnings en las pruebas por console logs
     pool: {
         max: 10,           // según tu BD

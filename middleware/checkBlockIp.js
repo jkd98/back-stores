@@ -1,4 +1,4 @@
-import { Log } from '../models/index.js';
+import { Log, Respuesta } from '../models/index.js';
 
 import { obtenerIP,NivelesLog } from '../helpers/crearLog.js'
 import { Op } from 'sequelize';
@@ -11,6 +11,8 @@ const bloqueos = new Map(); // Guarda IPs bloqueadas en memoria
 
 
 export const checkBloquedIP = async (req, res, next) => {
+    let respuesta = new Respuesta();
+    respuesta = { status:'error',msg: 'Demasiados intentos. Intenta más tarde.'};
     const ip = obtenerIP(req);
     console.log(req.body)
 
@@ -18,7 +20,7 @@ export const checkBloquedIP = async (req, res, next) => {
     if (bloqueos.has(ip)) {
         const tiempoBloqueo = bloqueos.get(ip);
         if (Date.now() < tiempoBloqueo) {
-            return res.status(429).json({ message: 'Demasiados intentos. Intenta más tarde.' });
+            return res.status(429).json(respuesta);
         } else {
             bloqueos.delete(ip); // Ya pasó el tiempo
         }
@@ -38,7 +40,7 @@ export const checkBloquedIP = async (req, res, next) => {
 
     if (intentosFallidos >= LIMITE_INTENTOS) {
         bloqueos.set(ip, Date.now() + BLOQUEO_MIN * 60 * 1000);
-        return res.status(429).json({ message: 'Demasiados intentos. Intenta más tarde.' });
+        return res.status(429).json(respuesta);
     }
 
     next();

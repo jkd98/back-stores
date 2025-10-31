@@ -4,8 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "jest",
-    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --detectOpenHandles --coverage",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --detectOpenHandles",
+    "test:coverage": "npm test && --coverage",
     "swagger": "node ./config/swagger-autogen.js",
     "preserver": "npm run swagger",
     "server": "nodemon ./index.js",

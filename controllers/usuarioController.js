@@ -199,13 +199,13 @@ const login = async (req, res) => {
         if (!user.emailConfirm) {
             // Generar token
             const nwToken = await Token.create({
-                userId: existeUsuario.id,
+                userId: user.id,
                 code: generateSixDigitToken(),
                 expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
                 typeCode: tokenTypes.ACCOUNT_CONFIRMATION
             })
 
-            emailRegistro({ email, name: user.name, token: nwToken.code });
+            //emailRegistro({ email, name: user.name, token: nwToken.code });
             respuesta.status = 'error';
             respuesta.msg = 'La cuenta no ha sido confirmada. Se ha enviado un codigo de confirmación a tu email';
             return res.status(401).json(respuesta);
@@ -431,7 +431,7 @@ const tokenResetPassword = async (req, res) => {
 
         //TODO:Activar el envio de emails
         //  Enviar email con token
-        emailOlvidePass({ email, name: existsUser.name, token: nwToken.code });
+        //emailOlvidePass({ email, name: existsUser.name, token: nwToken.code });
 
         await nwToken.save()
         respuesta.status = 'success';
