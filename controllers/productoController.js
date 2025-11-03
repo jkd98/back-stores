@@ -18,7 +18,7 @@ export const registrarProducto = async (req, res) => {
     } = req.body;
 
     try {
-        
+
         const proveedorExists = await Proveedor.findByPk(id_proveedor);
 
         if (!proveedorExists) {
@@ -68,7 +68,7 @@ export const listAllProducts = async (req, res) => {
     let respuesta = new Respuesta();
     try {
         const products = await Producto.findAll(
-            { limit: parseInt(limit), offset: parseInt(page - 1) * parseInt(limit) }
+            { where: { borrado: false }, limit: parseInt(limit), offset: parseInt(page - 1) * parseInt(limit) }
         );
 
         respuesta.status = 'success';
@@ -78,7 +78,7 @@ export const listAllProducts = async (req, res) => {
 
     } catch (error) {
         console.log(error)
-        respuesta.status = 'erros';
+        respuesta.status = 'error';
         respuesta.msg = 'No se pudieron listar los productos'
         return res.status(500).json(respuesta);
     }

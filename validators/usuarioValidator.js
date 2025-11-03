@@ -114,4 +114,3 @@ export const validarNwPass = [
     .escape()
     .notEmpty().withMessage('El token es obligatorio')
 ];
-

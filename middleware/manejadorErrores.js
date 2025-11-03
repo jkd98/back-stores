@@ -8,7 +8,8 @@ export const manejarErrores = (req, res, next) => {
   if (!errores.isEmpty()) {
     let respuesta = new Respuesta();
     respuesta.status = 'error';
-    respuesta.msg = 'Se detectaron campos con errores';
+    //respuesta.msg = 'Se detectaron campos con errores';
+    respuesta.msg = errores.array().map(e=>`\n${e.msg}\n`);
     respuesta.data = errores.array();
     return res.status(400).json(respuesta);
   }

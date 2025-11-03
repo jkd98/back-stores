@@ -11,11 +11,12 @@ import {
 import { validDeleteProduct, validEditProduct, validFilterProducts, validNwProduct } from '../validators/productoValidator.js';
 import { validPagination } from '../validators/gnrlValidator.js';
 import { manejarErrores } from '../middleware/manejadorErrores.js';
+import checkAuth from '../middleware/chekAuth.js';
 
 const router = express.Router();
 
 router.post('/', validNwProduct, manejarErrores, registrarProducto);
-router.get('/list', validPagination , manejarErrores, listAllProducts);
+router.get('/list', validPagination , manejarErrores, checkAuth, listAllProducts);
 router.post('/edit', validEditProduct, manejarErrores, editarProducto);
 router.post('/filter', validPagination, validFilterProducts, manejarErrores, filtrarProductos);
 router.post('/delete', validDeleteProduct, manejarErrores, eliminarProductos);
