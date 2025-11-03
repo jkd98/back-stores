@@ -30,8 +30,11 @@ export const validNwProduct = [
 
 export const validEditProduct = [
     body('codigo')
-        .toInt()
-        .isInt({ min: 0 }).withMessage('Solo se aceptan números mayores o igual a 0'),
+        .trim()
+        .escape()
+        .notEmpty().withMessage('El código no es válido')
+        .isNumeric().withMessage('Solo se admiten números')
+        .isLength({ min: 10 }).withMessage('El código debe de tener 10 digitos'),
     body('nombre')
         .optional()
         .trim()
@@ -81,6 +84,9 @@ export const validFilterProducts = [
 
 export const validDeleteProduct = [
     body('codigo')
-        .toInt()
-        .isInt({ min: 1 }).withMessage('Solo se aceptan números positivos'),
+        .trim()
+        .escape()
+        .notEmpty().withMessage('El código no es válido')
+        .isNumeric().withMessage('Solo se admiten números')
+        .isLength({ min: 10 }).withMessage('El código debe de tener 10 digitos'),
 ]

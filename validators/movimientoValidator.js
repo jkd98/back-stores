@@ -7,10 +7,10 @@ export const validNwMovimiento = [
         .escape(),
     body('codigo')
         .trim()
+        .escape()
         .notEmpty().withMessage('El código no es válido')
         .isNumeric().withMessage('Solo se admiten números')
-        .isLength({ min: 10 }).withMessage('El código debe de tener 10 digitos')
-        .escape(),
+        .isLength({ min: 10 }).withMessage('El código debe de tener 10 digitos'),
     body('cantidad')
         .toInt()
         .isInt({ min: 1 }).withMessage('La cantidad debe ser mayor que 0'),
