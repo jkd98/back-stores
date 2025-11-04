@@ -385,7 +385,7 @@
                   "nombre": {
                     "example": "any"
                   },
-                  "descip": {
+                  "descrip": {
                     "example": "any"
                   },
                   "categoria": {
@@ -474,7 +474,7 @@
                   "nombre": {
                     "example": "any"
                   },
-                  "descip": {
+                  "descrip": {
                     "example": "any"
                   },
                   "categoria": {

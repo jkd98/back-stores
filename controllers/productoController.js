@@ -84,6 +84,32 @@ export const listAllProducts = async (req, res) => {
     }
 }
 
+export const getProductByCode = async (req, res) => {
+    let respuesta = new Respuesta();
+    let { codigo } = req.params;
+    try {
+        const product = await Producto.findOne({ where: { codigo } });
+
+        if (!product) {
+            respuesta.status = 'error';
+            respuesta.msg = 'El producto no existe'
+            respuesta.data = null;
+            return res.status(404).json(respuesta);
+        }
+
+        respuesta.status = 'success';
+        respuesta.msg = 'Producto Obtenido'
+        respuesta.data = product;
+        return res.status(200).json(respuesta);
+
+    } catch (error) {
+        console.log(error)
+        respuesta.status = 'error';
+        respuesta.msg = 'No se pudo traer el producto'
+        return res.status(500).json(respuesta);
+    }
+}
+
 /**
  * Función para editar codigo, nombre, descrip, unidad de medida y el estock minimo
  */

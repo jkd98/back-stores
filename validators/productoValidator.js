@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 
 export const validNwProduct = [
     body('nombre')
@@ -26,6 +26,15 @@ export const validNwProduct = [
     body('id_proveedor')
         .toInt()
         .isInt({ min: 1 }).withMessage('Solo se aceptan números positivos'),
+]
+
+export const validGetOneProduct = [
+    param('codigo')
+        .trim()
+        .escape()
+        .notEmpty().withMessage('El código no es válido')
+        .isNumeric().withMessage('Solo se admiten números')
+        .isLength({ min: 10 }).withMessage('El código debe de tener 10 digitos'),
 ]
 
 export const validEditProduct = [
