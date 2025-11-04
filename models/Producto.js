@@ -20,7 +20,7 @@ Producto.init(
             type: DataTypes.STRING(200),
             allowNull: false
         },
-        descip: {
+        descrip: {
             type: DataTypes.STRING(400),
             allowNull: false,
         },

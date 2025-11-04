@@ -15,10 +15,10 @@ import checkAuth from '../middleware/chekAuth.js';
 
 const router = express.Router();
 
-router.post('/', validNwProduct, manejarErrores, registrarProducto);
+router.post('/', validNwProduct, manejarErrores, checkAuth,registrarProducto);
 router.get('/list', validPagination , manejarErrores, checkAuth, listAllProducts);
-router.post('/edit', validEditProduct, manejarErrores, editarProducto);
-router.post('/filter', validPagination, validFilterProducts, manejarErrores, filtrarProductos);
-router.post('/delete', validDeleteProduct, manejarErrores, eliminarProductos);
+router.post('/edit', validEditProduct, manejarErrores, checkAuth ,editarProducto);
+router.post('/filter', validPagination, validFilterProducts, manejarErrores, checkAuth, filtrarProductos);
+router.post('/delete', validDeleteProduct, manejarErrores, checkAuth, eliminarProductos);
 
 export default router

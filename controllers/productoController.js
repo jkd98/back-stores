@@ -10,7 +10,7 @@ export const registrarProducto = async (req, res) => {
     let respuesta = new Respuesta();
     const {
         nombre,
-        descip,
+        descrip,
         categoria,
         unidad,
         stock_minimo,
@@ -31,7 +31,7 @@ export const registrarProducto = async (req, res) => {
         const nwProduct = Producto.build({
             codigo: await generateTenDigitCode(),
             nombre,
-            descip,
+            descrip,
             categoria,
             unidad,
             stock_minimo,
@@ -93,7 +93,7 @@ export const editarProducto = async (req, res) => {
     const {
         codigo,
         nombre,
-        descip,
+        descrip,
         categoria,
         unidad,
         stock_minimo,
@@ -108,7 +108,7 @@ export const editarProducto = async (req, res) => {
         }
 
         product.nombre = nombre || product.nombre;
-        product.descip = descip || product.descip;
+        product.descrip = descrip || product.descrip;
         product.categoria = categoria || product.categoria;
         product.unidad = unidad || product.unidad;
         product.stock_minimo = stock_minimo || product.stock_minimo;

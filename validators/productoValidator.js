@@ -6,7 +6,7 @@ export const validNwProduct = [
         .notEmpty().withMessage('El nombre es obligatorio')
         .isLength({ min: 5 }).withMessage('El nombre debe tener al menos 5 caracteres')
         .escape(),
-    body('descip')
+    body('descrip')
         .trim()
         .notEmpty().withMessage('La descripción es obligatoria')
         .isLength({ min: 5 }).withMessage('La descripción debe tener al menos 5 caracteres')
@@ -41,7 +41,7 @@ export const validEditProduct = [
         .notEmpty().withMessage('El nombre no puede ir vacío')
         .isLength({ min: 5 }).withMessage('El nombre debe tener al menos 5 caracteres')
         .escape(),
-    body('descip')
+    body('descrip')
         .optional()
         .trim()
         .notEmpty().withMessage('La descripción no puede ir vacía')
