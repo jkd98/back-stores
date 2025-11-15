@@ -8,19 +8,20 @@ const transport = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
+const reff = process.env.E_FRONT;
+const domainn = '.com'
+
 
 const emailRegistro = async (datos) => {
     //console.log(datos);
     const { email, name, token } = datos;
-    const domainn = 'EventStar.com'
 
     const subject = `Confirma tu Cuenta en ${domainn}`;
     const text = `Confirma tu Cuenta en ${domainn} ahora:`;
-    const reff = process.env.E_FRONT;
     const html = `
         <p>Hola ${name}, comprueba tu cuenta en ${domainn}</p>
         <p>Tu cuenta ya esta casi lista, solo debes ingresar el siguiente código: ${token}</p>
-        <p>Dando click en el siguiente <a href="http://localhost:4200/usuario/confirmar-cuenta">enlace</a> </p>
+        <p>Dando click en el siguiente <a href="${reff}/#/auth/confirm-account">enlace</a> </p>
         <p>Este código expira en 5 minutos</p>
         
         <p>Si tu no creaste esta cuenta, puedes ignorar el mensaje</p>
