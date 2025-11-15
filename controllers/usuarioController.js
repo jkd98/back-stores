@@ -51,11 +51,8 @@ const registrarUsuario = async (req, res) => {
         console.log("Preregistro:\n", nwUser);
 
         // Generar token
-        const nwToken = await Token.create({
-            userId: nwUser.id,
-            code: generateSixDigitToken(),
-            typeCode: tokenTypes.ACCOUNT_CONFIRMATION
-        })
+        const nwToken = await generateToken(nwUser, tokenTypes.ACCOUNT_CONFIRMATION);
+
 
 
         //TODO: Activar el envio de emails
@@ -145,12 +142,7 @@ const generarTokenConfirm = async (req, res) => {
 
 
         // Generar token
-        const nwToken = await Token.create({
-            userId: existeUsuario.id,
-            code: generateSixDigitToken(),
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
-            typeCode: tokenTypes.ACCOUNT_CONFIRMATION
-        })
+        const nwToken = await generateToken(existeUsuario, tokenTypes.ACCOUNT_CONFIRMATION);
 
         // TODO: Habilitar el envio de emails
         //emailRegistro({ email, name: existeUsuario.name, token: nwToken.code });
@@ -197,12 +189,7 @@ const login = async (req, res) => {
 
         if (!user.emailConfirm) {
             // Generar token
-            const nwToken = await Token.create({
-                userId: user.id,
-                code: generateSixDigitToken(),
-                expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
-                typeCode: tokenTypes.ACCOUNT_CONFIRMATION
-            })
+            const nwToken = await generateToken(user, tokenTypes.ACCOUNT_CONFIRMATION);
 
             //emailRegistro({ email, name: user.name, token: nwToken.code });
             respuesta.status = 'error';
@@ -211,12 +198,8 @@ const login = async (req, res) => {
         }
 
         // Generar código 2FA
-        const twoFactorCode = Token.build({
-            userId: user.id,
-            code: generateSixDigitToken(),
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
-            typeCode: tokenTypes.TWO_FACTOR
-        })
+        const twoFactorCode = await generateToken(user, tokenTypes.TWO_FACTOR);
+
 
         //await emailCodigoVerificacion({ name: user.name, email: user.email, code: twoFactorCode.code })
 
@@ -224,7 +207,7 @@ const login = async (req, res) => {
 
         respuesta.status = 'success';
         respuesta.msg = 'Token 2FA enviado a correo';
-        respuesta.data = {userId:user.id};
+        respuesta.data = { userId: user.id };
         return res.status(200).json(respuesta);
 
     } catch (error) {
@@ -239,16 +222,12 @@ const login = async (req, res) => {
                 return res.status(404).json(respuesta);
             }
             // Generar código 2FA
-            const twoFactorCode = await Token.create({
-                userId: user.id,
-                code: generateSixDigitToken(),
-                expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
-                typeCode: tokenTypes.TWO_FACTOR
-            })
+            const twoFactorCode = await generateToken(user, tokenTypes.TWO_FACTOR);
 
-            respuesta.status='success';
-            respuesta.msg='token de verificación en dos pasos';
-            respuesta.data={ userId: user.id, code: twoFactorCode.code };
+
+            respuesta.status = 'success';
+            respuesta.msg = 'token de verificación en dos pasos';
+            respuesta.data = { userId: user.id, code: twoFactorCode.code };
             res.json(respuesta)
         } else {
             respuesta.status = 'error';
@@ -273,8 +252,6 @@ const verify2FA = async (req, res) => {
 
             }
         })
-
-
 
         console.log("Tokens eliminados: ", deleted.length);
 
@@ -324,7 +301,7 @@ const verify2FA = async (req, res) => {
             await user.save()
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
-            respuesta.data = {tkn,user};
+            respuesta.data = { tkn, user };
             return res.status(200).json(respuesta);
         } else {
             user.lat = location.location.lat;
@@ -332,11 +309,14 @@ const verify2FA = async (req, res) => {
             await user.save()
             respuesta.status = 'success';
             respuesta.msg = 'Has accedido desde una nueva ubicación';
-            respuesta.data = {tkn,user:{
-                name: `${user.name} ${user.lastN}`,
-                email: user.email,
-                role: user.role
-            }};
+            respuesta.data = {
+                tkn, 
+                user: {
+                    name: `${user.name} ${user.lastN}`,
+                    email: user.email,
+                    role: user.role
+                }
+            };
             return res.status(200).json(respuesta);
         }
 
@@ -365,11 +345,14 @@ const verify2FA = async (req, res) => {
 
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
-            respuesta.data = {tkn,user:{
-                name: `${user.name} ${user.lastN}`,
-                email: user.email,
-                role: user.role
-            }};
+            respuesta.data = {
+                tkn, 
+                user: {
+                    name: `${user.name} ${user.lastN}`,
+                    email: user.email,
+                    role: user.role
+                }
+            };
             return res.status(200).json(respuesta);
         } else {
             respuesta.status = 'error';
@@ -431,14 +414,7 @@ const tokenResetPassword = async (req, res) => {
         }
 
         //  Generar token
-        const nwToken = Token.build({
-            userId: existsUser.id,
-            code: generateSixDigitToken(),
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
-            used: false,
-            typeCode: tokenTypes.PASSWORD_RESET
-
-        })
+        const nwToken = await generateToken(existsUser, tokenTypes.PASSWORD_RESET);
 
         //TODO:Activar el envio de emails
         //  Enviar email con token
@@ -538,6 +514,17 @@ const resetPassword = async (req, res) => {
         respuesta.msg = 'Error al cambiar el password';
         return res.status(500).json(respuesta);
     }
+}
+
+async function generateToken(user, typeCode) {
+    const nwToken = await Token.create({
+        userId: user._id,
+        code: generateSixDigitToken(),
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
+        used: false,
+        typeCode: typeCode || tokenTypes.ACCOUNT_CONFIRMATION
+    })
+    return nwToken
 }
 
 export {
