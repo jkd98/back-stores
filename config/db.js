@@ -12,7 +12,12 @@ const db = new Sequelize({
     dialect: 'postgres',
     timezone: '+00:00', // UTC
     dialectOptions: {
-        useUT: true
+        useUT: true,
+        ssl: { //Esto se agrego para la db remota
+            require: true,
+            rejectUnauthorized: false
+        }
+
     },
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
