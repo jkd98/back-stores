@@ -54,7 +54,6 @@ const registrarUsuario = async (req, res) => {
         const nwToken = await Token.create({
             userId: nwUser.id,
             code: generateSixDigitToken(),
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
             typeCode: tokenTypes.ACCOUNT_CONFIRMATION
         })
 
@@ -267,6 +266,18 @@ const verify2FA = async (req, res) => {
     let respuesta = new Respuesta()
     const { code, userId } = req.body;
     try {
+
+        const deleted = await Token.destroy({
+            where: {
+                expiresAt: { [Op.lte]: new Date() },
+
+            }
+        })
+
+
+
+        console.log("Tokens eliminados: ", deleted.length);
+
         const validCode = await Token.findOne({
             where: {
                 userId,
