@@ -9,7 +9,7 @@ const transport = nodemailer.createTransport({
     }
 });
 const reff = process.env.E_FRONT;
-const domainn = '.com'
+const domainn = 'InvetoryProd.com'
 
 
 const emailRegistro = async (datos) => {
@@ -42,12 +42,9 @@ const emailRegistro = async (datos) => {
 const emailOlvidePass = async (datos) => {
     //console.log(datos);
     const { email, name, token } = datos;
-    const domainn = 'EventStar.com'
 
     const subject = `Reestablece tu password en ${domainn}`;
     const text = `Reestablece tu password en ${domainn} ahora:`;
-    //const reff = process.env.E_BACKEND_URL;
-    const reff = process.env.E_FRONT;
     const html = `
         <></>
         <p>Hola ${name}, haz solicitado cambiar tu password en ${domainn}</p>
@@ -67,9 +64,6 @@ const emailOlvidePass = async (datos) => {
 };
 
 const emailCodigoVerificacion = async ({ email, name, code }) => {
-    const domainn = 'EventStar.com'
-
-
     const subject = `Código de Verificación (2FA)`;
     const text = `Hola ${name}, tu código de verificación es: ${code}`;
     //const reff = process.env.E_BACKEND_URL;
@@ -117,7 +111,6 @@ const emailAlerta = async (datos) => {
         `
     }
 
-    const domainn = 'EventStar.com'
     const subject = `Productos apunto de agotarse`;
     const text = `Alerta de productos por debajo del stock mínimo`;
     const html = `
