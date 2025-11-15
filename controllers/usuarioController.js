@@ -518,7 +518,7 @@ const resetPassword = async (req, res) => {
 
 async function generateToken(user, typeCode) {
     const nwToken = await Token.create({
-        userId: user._id,
+        userId: user.id,
         code: generateSixDigitToken(),
         expiresAt: new Date(Date.now() + 5 * 60 * 1000),  // -> 300,000 milisegundos (5 minutos)
         used: false,
