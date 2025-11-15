@@ -48,7 +48,7 @@ const registrarUsuario = async (req, res) => {
             telf
         });
 
-        console.log("Preregistro:\n", nwUser);
+        //console.log("Preregistro:\n", nwUser);
 
         // Generar token
         const nwToken = await generateToken(nwUser, tokenTypes.ACCOUNT_CONFIRMATION);
@@ -56,7 +56,7 @@ const registrarUsuario = async (req, res) => {
 
 
         //TODO: Activar el envio de emails
-        //emailRegistro({ email, name, token: nwToken.code });
+        emailRegistro({ email, name, token: nwToken.code });
 
         respuesta.status = 'success';
         respuesta.msg = 'Registro completado, confirma tu cuenta para activarla';
@@ -145,7 +145,7 @@ const generarTokenConfirm = async (req, res) => {
         const nwToken = await generateToken(existeUsuario, tokenTypes.ACCOUNT_CONFIRMATION);
 
         // TODO: Habilitar el envio de emails
-        //emailRegistro({ email, name: existeUsuario.name, token: nwToken.code });
+        emailRegistro({ email, name: existeUsuario.name, token: nwToken.code });
 
         respuesta.status = 'success';
         respuesta.msg = 'Nuevo token enviado al email';
@@ -191,7 +191,7 @@ const login = async (req, res) => {
             // Generar token
             const nwToken = await generateToken(user, tokenTypes.ACCOUNT_CONFIRMATION);
 
-            //emailRegistro({ email, name: user.name, token: nwToken.code });
+            emailRegistro({ email, name: user.name, token: nwToken.code });
             respuesta.status = 'error';
             respuesta.msg = 'La cuenta no ha sido confirmada. Se ha enviado un codigo de confirmación a tu email';
             return res.status(401).json(respuesta);
@@ -201,7 +201,7 @@ const login = async (req, res) => {
         const twoFactorCode = await generateToken(user, tokenTypes.TWO_FACTOR);
 
 
-        //await emailCodigoVerificacion({ name: user.name, email: user.email, code: twoFactorCode.code })
+        await emailCodigoVerificacion({ name: user.name, email: user.email, code: twoFactorCode.code })
 
         await twoFactorCode.save();
 
@@ -310,7 +310,7 @@ const verify2FA = async (req, res) => {
             respuesta.status = 'success';
             respuesta.msg = 'Has accedido desde una nueva ubicación';
             respuesta.data = {
-                tkn, 
+                tkn,
                 user: {
                     name: `${user.name} ${user.lastN}`,
                     email: user.email,
@@ -346,7 +346,7 @@ const verify2FA = async (req, res) => {
             respuesta.status = 'success';
             respuesta.msg = 'Autenticación exitosa';
             respuesta.data = {
-                tkn, 
+                tkn,
                 user: {
                     name: `${user.name} ${user.lastN}`,
                     email: user.email,
@@ -372,7 +372,7 @@ const logOut = async (req, res) => {
     const { email } = req.body;
     try {
         const existsUser = await Usuario.findOne({ where: { email } });
-        console.log(existsUser)
+        //console.log(existsUser)
 
         if (!existsUser) {
             respuesta.status = 'error';
@@ -418,7 +418,7 @@ const tokenResetPassword = async (req, res) => {
 
         //TODO:Activar el envio de emails
         //  Enviar email con token
-        //emailOlvidePass({ email, name: existsUser.name, token: nwToken.code });
+        emailOlvidePass({ email, name: existsUser.name, token: nwToken.code });
 
         await nwToken.save()
         respuesta.status = 'success';
