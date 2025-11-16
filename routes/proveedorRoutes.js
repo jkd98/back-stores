@@ -6,6 +6,7 @@ import {
     editarProveedor,
     eliminarProveedor,
     listAllProviders,
+    obtenerProveedorPorId,
     registrarProveedor
 } from '../controllers/proveedorController.js';
 
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.get('/', validPagination, manejarErrores, listAllProviders);
 router.post('/', validNwProveedor, manejarErrores, registrarProveedor);
+router.post('/one', obtenerProveedorPorId)
 router.post('/edit', validEditProveedor, manejarErrores, editarProveedor);
 router.post('/delete', validEliminarProveedor, manejarErrores, eliminarProveedor);
 

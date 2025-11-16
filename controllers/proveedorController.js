@@ -63,7 +63,7 @@ export const listAllProviders = async (req, res) => {
     const { page = 1, limit = 5 } = req.query;
     try {
         const providers = await Proveedor.findAll(
-            { limit: parseInt(limit), offset: parseInt(page - 1) * parseInt(limit) }
+            { where: { disable: false }, limit: parseInt(limit), offset: parseInt(page - 1) * parseInt(limit) }
         );
         respuesta.status = 'success';
         respuesta.msg = 'Listado de proveedores';
@@ -75,6 +75,34 @@ export const listAllProviders = async (req, res) => {
         respuesta.status = 'error';
         respuesta.msg = 'No se pudieron traer a los proveedores';
         return res.status(500).json(respuesta)
+    }
+}
+
+/**
+ * Función para traer a un solo proveedor por id 
+ * */
+export const obtenerProveedorPorId = async (req, res) => {
+    let respuesta = new Respuesta();
+    const { id_proveedor } = req.body;
+    try {
+        const provider = await Proveedor.findByPk(id_proveedor);
+
+        if (!provider) {
+            respuesta.status = 'error';
+            respuesta.msg = 'No se encontró al proveedor';
+            return res.status(404).json(respuesta);
+        }
+
+        respuesta.status = 'success';
+        respuesta.msg = 'Proveedor encontrado';
+        respuesta.data = provider;
+        return res.status(200).json(respuesta);
+
+    } catch (error) {
+        console.log(error);
+        respuesta.status = 'error';
+        respuesta.msg = 'No se pudo traer al proveedor';
+        return res.status(500).json(respuesta);
     }
 }
 
@@ -104,8 +132,9 @@ export const editarProveedor = async (req, res) => {
         }
 
         if (whers.length > 0) {
+            console.log(whers);
             const providerExists = await Proveedor.findOne({ where: { [Op.or]: whers } })
-            if (providerExists && providerExists.id_cliente !== provider.id_cliente) {
+            if (providerExists && providerExists.id_proveedor !== provider.id_proveedor) {
                 if (providerExists.telf === telf) {
                     respuesta.status = 'error';
                     respuesta.msg = 'Ya existe un proveedor registrado con ese número de teléfono';
