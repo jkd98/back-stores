@@ -63,7 +63,7 @@ export const listAllClientes = async (req, res) => {
     const { page = 1, limit = 5 } = req.query;
     try {
         const clients = await Cliente.findAll(
-            { limit: parseInt(limit), offset: parseInt(page - 1) * parseInt(limit) }
+            { where: { disable: false }, limit: parseInt(limit), offset: parseInt(page - 1) * parseInt(limit) }
         );
         respuesta.status = 'success';
         respuesta.msg = 'Listado de clientes';
@@ -77,6 +77,34 @@ export const listAllClientes = async (req, res) => {
         return res.status(500).json(respuesta)
     }
 }
+
+/**
+ * Función para obtener un cliente por su ID
+ */
+export const obtenerClientePorId = async (req, res) => {
+    let respuesta = new Respuesta();
+    const { id_cliente } = req.body;
+    try {
+        const client = await Cliente.findByPk(id_cliente);
+        if (!client) {
+            respuesta.status = 'error';
+            respuesta.msg = 'No se encontró al cliente';
+            return res.status(404).json(respuesta);
+        }
+
+        respuesta.status = 'success';
+        respuesta.msg = 'Cliente encontrado';
+        respuesta.data = client;
+        return res.status(200).json(respuesta);
+
+    } catch (error) {
+        console.log(error);
+        respuesta.status = 'error';
+        respuesta.msg = 'No se pudo traer al cliente';
+        return res.status(500).json(respuesta)
+    }
+}
+
 
 /**
  * Función para editar a un cliente
@@ -104,7 +132,7 @@ export const editarCliente = async (req, res) => {
         }
 
         if (whers.length > 0) {
-            const clientExists = await Cliente.findOne({ where: { [Op.or]: whers } })
+            const clientExists = await Cliente.findOne({ where: { id_cliente: { [Op.ne]: id_cliente }, [Op.or]: whers } })
             if (clientExists && clientExists.id_cliente !== client.id_cliente) {
                 if (clientExists.telf === telf) {
                     respuesta.status = 'error';

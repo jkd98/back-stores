@@ -133,7 +133,8 @@ export const editarProveedor = async (req, res) => {
 
         if (whers.length > 0) {
             console.log(whers);
-            const providerExists = await Proveedor.findOne({ where: { [Op.or]: whers } })
+            const providerExists = await Proveedor.findOne({ where: { id_proveedor: { [Op.ne]: id_proveedor }, [Op.or]: whers } })
+            
             if (providerExists && providerExists.id_proveedor !== provider.id_proveedor) {
                 if (providerExists.telf === telf) {
                     respuesta.status = 'error';

@@ -3,13 +3,14 @@ import { validEditClient, validEliminarCliente, validNwCliente } from '../valida
 import { validPagination } from '../validators/gnrlValidator.js';
 import { manejarErrores } from '../middleware/manejadorErrores.js';
 
-import { editarCliente, eliminarCliente, listAllClientes, registrarCliente } from '../controllers/clienteController.js';
+import { editarCliente, eliminarCliente, listAllClientes, obtenerClientePorId, registrarCliente } from '../controllers/clienteController.js';
 
 
 const router = express.Router();
 
 router.get('/', validPagination, manejarErrores, listAllClientes);
 router.post('/', validNwCliente, manejarErrores, registrarCliente);
+router.post('/one',obtenerClientePorId);
 router.post('/edit', validEditClient, manejarErrores, editarCliente);
 router.post('/delete', validEliminarCliente, manejarErrores, eliminarCliente);
 
