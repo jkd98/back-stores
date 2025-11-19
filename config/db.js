@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import pg from 'pg';
 //import { Product } from '../models/Product.model';
 
 
@@ -10,6 +11,7 @@ const db = new Sequelize({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     dialect: 'postgres',
+    dialectModule: pg,
     timezone: '+00:00', // UTC
     dialectOptions: {
         useUT: true,
