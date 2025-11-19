@@ -74,19 +74,19 @@ export const validEditProduct = [
 
 export const validFilterProducts = [
     body('nombre')
-        .optional()
+        .optional({ checkFalsy: true })
         .trim()
         .notEmpty().withMessage('El nombre no puede ir vacío')
-        .isLength({ min: 3 }).withMessage('El nombre debe tener al menos 3 caracteres')
+        .isLength({ min: 1 }).withMessage('El nombre debe tener al menos 1 caracteres')
         .escape(),
     body('categoria')
-        .optional()
+        .optional({ checkFalsy: true })
         .trim()
         .notEmpty().withMessage('La categoría no puede ir vacía')
-        .isLength({ min: 2 }).withMessage('La categoría debe tener al menos 2 caracteres')
+        .isLength({ min: 1 }).withMessage('La categoría debe tener al menos 1 caracteres')
         .escape(),
     body('proveedor')
-        .optional()
+        .optional({ checkFalsy: true })
         .toInt()
         .isInt({ min: 1 }).withMessage('Solo se aceptan números positivos'),
 ]

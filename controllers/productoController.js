@@ -158,7 +158,7 @@ export const editarProducto = async (req, res) => {
  */
 export const filtrarProductos = async (req, res) => {
     // #swagger.tags = ['Producto']
-    const { page = 1, limit = 5 } = req.query;
+    const { page = 1, limit = 1 } = req.query;
     let respuesta = new Respuesta();
     const { nombre, categoria, proveedor } = req.body;
     let whers = [];
@@ -181,25 +181,49 @@ export const filtrarProductos = async (req, res) => {
         }
 
         if (whers.length > 0) {
-            products = await Producto.findAll(
+            const { count, rows } = await Producto.findAndCountAll(
                 {
                     where: {
+                        borrado: false,
                         [Op.and]: whers
                     },
+                    include: 'proveedor',
                     limit,
                     offset: parseInt(page - 1) * parseInt(limit)
                 }
             );
+            products = rows;
+            const totalPages = Math.ceil(count / limit);
+
             respuesta.msg = `Coincidencias de productos por ${filters.join(', ')}`;
+            respuesta.metadata = {
+                totalItems: count,
+                totalPages,
+                currentPage: parseInt(page),
+                hasNextPage: parseInt(page) < totalPages,
+                hasPrevPage: parseInt(page) > 1,
+                limit: parseInt(limit)
+            }
         } else {
-            products = await Producto.findAll(
+            const { count, rows } = await Producto.findAndCountAll(
                 {
-                    where: {},
+                    where: {borrado: false},
+                    include: 'proveedor',
                     limit: parseInt(limit),
                     offset: parseInt(page - 1) * parseInt(limit)
                 }
             );
+            products = rows;
+            const totalPages = Math.ceil(count / limit);
             respuesta.msg = 'Coincidencias de productos sin filtros';
+            respuesta.metadata = {
+                totalItems: count,
+                totalPages,
+                currentPage: parseInt(page),
+                hasNextPage: parseInt(page) < totalPages,
+                hasPrevPage: parseInt(page) > 1,
+                limit: parseInt(limit)
+            }
         }
 
         respuesta.status = 'success';
@@ -207,7 +231,7 @@ export const filtrarProductos = async (req, res) => {
         return res.status(200).json(respuesta);
     } catch (error) {
         console.log(error)
-        respuesta.status = 'erros';
+        respuesta.status = 'error';
         respuesta.msg = 'No se pudieron listar los productos'
         return res.status(500).json(respuesta);
     }
