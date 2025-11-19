@@ -9,10 +9,12 @@ import {
     obtenerProveedorPorId,
     registrarProveedor
 } from '../controllers/proveedorController.js';
+import checkAuth from '../middleware/chekAuth.js';
 
 
 const router = express.Router();
 
+app.use(checkAuth)
 router.get('/', validPagination, manejarErrores, listAllProviders);
 router.post('/', validNwProveedor, manejarErrores, registrarProveedor);
 router.post('/one', obtenerProveedorPorId)

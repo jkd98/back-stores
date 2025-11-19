@@ -5,10 +5,12 @@ import { validPagination } from '../validators/gnrlValidator.js';
 
 import { manejarErrores } from '../middleware/manejadorErrores.js';
 import { filtrarMovimientos, listAllMovs, registrarMovimiento } from '../controllers/movimientosController.js';
+import checkAuth from '../middleware/chekAuth.js';
 
 
 const router = express.Router();
 
+app.use(checkAuth)
 router.post('/', validNwMovimiento, manejarErrores, registrarMovimiento);
 router.get('/', validPagination, manejarErrores, listAllMovs);
 router.post('/filter', validPagination, validFilter ,manejarErrores, filtrarMovimientos);

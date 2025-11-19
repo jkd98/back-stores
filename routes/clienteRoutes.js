@@ -4,10 +4,12 @@ import { validPagination } from '../validators/gnrlValidator.js';
 import { manejarErrores } from '../middleware/manejadorErrores.js';
 
 import { editarCliente, eliminarCliente, listAllClientes, obtenerClientePorId, registrarCliente } from '../controllers/clienteController.js';
+import checkAuth from '../middleware/chekAuth.js';
 
 
 const router = express.Router();
 
+app.use(checkAuth)
 router.get('/', validPagination, manejarErrores, listAllClientes);
 router.post('/', validNwCliente, manejarErrores, registrarCliente);
 router.post('/one',obtenerClientePorId);
