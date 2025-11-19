@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 const transport = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
+    secure:false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
@@ -28,7 +29,7 @@ const emailRegistro = async (datos) => {
     `;
     //Enviar
     const response = await transport.sendMail({
-        from: domainn, //quie?
+        from: process.env.EMAIL_USER, //quie?
         to: email, //para quien?
         subject, //asunto
         text,
