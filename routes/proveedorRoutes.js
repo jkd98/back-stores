@@ -14,7 +14,7 @@ import checkAuth from '../middleware/chekAuth.js';
 
 const router = express.Router();
 
-app.use(checkAuth)
+router.use(checkAuth)
 router.get('/', validPagination, manejarErrores, listAllProviders);
 router.post('/', validNwProveedor, manejarErrores, registrarProveedor);
 router.post('/one', obtenerProveedorPorId)

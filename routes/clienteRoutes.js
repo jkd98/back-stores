@@ -9,7 +9,7 @@ import checkAuth from '../middleware/chekAuth.js';
 
 const router = express.Router();
 
-app.use(checkAuth)
+router.use(checkAuth)
 router.get('/', validPagination, manejarErrores, listAllClientes);
 router.post('/', validNwCliente, manejarErrores, registrarCliente);
 router.post('/one',obtenerClientePorId);

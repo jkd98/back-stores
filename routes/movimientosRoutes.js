@@ -10,7 +10,7 @@ import checkAuth from '../middleware/chekAuth.js';
 
 const router = express.Router();
 
-app.use(checkAuth)
+router.use(checkAuth)
 router.post('/', validNwMovimiento, manejarErrores, registrarMovimiento);
 router.get('/', validPagination, manejarErrores, listAllMovs);
 router.post('/filter', validPagination, validFilter ,manejarErrores, filtrarMovimientos);
