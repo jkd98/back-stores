@@ -16,6 +16,8 @@ import clienteRoutes from './routes/clienteRoutes.js';
 import movimientosRoutes from './routes/movimientosRoutes.js';
 import { alertaStockMinimo } from './helpers/tareaProgramada.js';
 
+import { Usuario } from './models/index.js';
+
 // Esto va a buscar por un archivo .env
 dotenv.config();
 
