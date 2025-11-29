@@ -3,11 +3,16 @@ import nodemailer from 'nodemailer';
 const transport = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
-    secure:false,
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    }
+    },
+    // Aumentar el timeout (por ejemplo, a 30 segundos = 30000ms)
+    // El valor predeterminado es 10 segundos (10000ms)
+    timeout: 30000,
+    // Opcional: Aumentar el tiempo de espera para el establecimiento de la conexión
+    connectionTimeout: 15000
 });
 const reff = process.env.E_FRONT;
 const domainn = 'InvetoryProd.com'
