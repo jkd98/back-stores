@@ -4,16 +4,18 @@ import { validFilter, validNwMovimiento } from '../validators/movimientoValidato
 import { validPagination } from '../validators/gnrlValidator.js';
 
 import { manejarErrores } from '../middleware/manejadorErrores.js';
-import { filtrarMovimientos, listAllMovs, registrarMovimiento } from '../controllers/movimientosController.js';
+import { filtrarMovimientos, listAllMovs, registrarMovimiento, exportarMovimientosExcel } from '../controllers/movimientosController.js';
 import checkAuth from '../middleware/chekAuth.js';
 
 
 const router = express.Router();
 
+//http://localhost:4000/movs
 router.use(checkAuth)
 router.post('/', validNwMovimiento, manejarErrores, registrarMovimiento);
 router.get('/', validPagination, manejarErrores, listAllMovs);
 router.post('/filter', validPagination, validFilter ,manejarErrores, filtrarMovimientos);
+router.get('/report',exportarMovimientosExcel);
 
 
 export default router;

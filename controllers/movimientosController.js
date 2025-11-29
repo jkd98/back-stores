@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import { Cliente, Movimiento, Producto, Proveedor, Respuesta } from "../models/index.js";
 import { emailAlerta } from "../helpers/email.js";
+import ExcelJS from 'exceljs'; // Importamos la librería para generar Excel
 
 //#region registraMovimeito
 /**
@@ -94,7 +95,7 @@ export const registrarMovimiento = async (req, res) => {
             Promise.allSettled([await nwMovimiento.save(), await productExists.save()]);
 
             if (productExists.stock_actual < productExists.stock_minimo){
-                await emailAlerta({productos:[productExists]})
+                await emailAlerta({productos:[productExists],email:req.usuario.email})
             }
 
                 respuesta.status = 'success';
@@ -217,6 +218,122 @@ export const filtrarMovimientos = async (req, res) => {
     } catch (error) {
         respuesta.status = 'error';
         respuesta.msg = 'No se pudieron filtrar los movimientos';
+        return res.status(500).json(respuesta);
+    }
+}
+
+/**
+ * Función para exportar todos los movimientos a un archivo Excel (.xlsx)
+ */
+export const exportarMovimientosExcel = async (req, res) => {
+    // #swagger.tags = ['Movimiento']
+    try {
+        // 1. Obtener todos los movimientos con sus relaciones
+        const movs = await Movimiento.findAll({
+            // Asegúrate de que las relaciones están bien definidas en tus modelos
+            include: [
+                { model: Producto, as: 'producto' },
+                { model: Proveedor, as: 'proveedor' },
+                { model: Cliente, as: 'cliente' }
+            ],
+            order: [['fecha', 'DESC']]
+        });
+
+        if (!movs || movs.length === 0) {
+            let respuesta = new Respuesta();
+            respuesta.status = 'warning';
+            respuesta.msg = 'No hay movimientos registrados para exportar.';
+            return res.status(200).json(respuesta);
+        }
+
+        // 2. Crear el libro y la hoja de trabajo
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Sistema de Inventario';
+        workbook.lastModifiedBy = 'Sistema de Inventario';
+        workbook.created = new Date();
+        workbook.modified = new Date();
+
+        const worksheet = workbook.addWorksheet('Reporte de Movimientos');
+
+        // 3. Definir las cabeceras
+        worksheet.columns = [
+            { header: 'ID', key: 'id', width: 10 },
+            { header: 'Fecha', key: 'fecha', width: 20 },
+            { header: 'Tipo', key: 'tipo', width: 15 },
+            { header: 'Producto', key: 'producto', width: 30 },
+            { header: 'Código Producto', key: 'codigo_producto', width: 20 },
+            { header: 'Cantidad', key: 'cantidad', width: 15 },
+            { header: 'Responsable', key: 'responsable', width: 35 },
+            { header: 'ID Responsable', key: 'id_responsable', width: 20 }
+        ];
+
+        // 4. Aplicar estilos a las cabeceras
+        worksheet.getRow(1).eachCell((cell) => {
+            cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '363636' }
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+
+        // 5. Llenar las filas con los datos
+        movs.forEach((mov, index) => {
+            // Determinar el responsable
+            const responsableNombre = mov.tipo === 'Entrada'
+                ? mov.proveedor?.nombre || 'N/A'
+                : mov.cliente?.nombre || 'N/A';
+
+            const responsableId = mov.tipo === 'Entrada'
+                ? mov.id_proveedor
+                : mov.id_cliente;
+
+            // Formatear la fecha
+            const fechaFormateada = mov.fecha ? new Date(mov.fecha).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : 'N/A';
+
+            worksheet.addRow({
+                id: mov.id_movimiento,
+                fecha: fechaFormateada,
+                tipo: mov.tipo,
+                producto: mov.producto?.nombre || 'Producto Desconocido',
+                codigo_producto: mov.producto?.codigo || 'N/A',
+                cantidad: mov.cantidad,
+                responsable: responsableNombre,
+                id_responsable: responsableId
+            });
+
+            // Aplicar estilo al contenido (ej. borde inferior)
+            worksheet.getRow(index + 2).eachCell((cell) => {
+                cell.border = { bottom: { style: 'thin', color: { argb: 'E0E0E0' } } };
+            });
+        });
+
+        // 6. Configurar la respuesta HTTP para descargar el archivo
+        res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename=' + `Reporte_Movimientos_${Date.now()}.xlsx`
+        );
+
+        // 7. Enviar el archivo
+        await workbook.xlsx.write(res);
+        res.end();
+
+    } catch (error) {
+        console.log(error);
+        let respuesta = new Respuesta();
+        respuesta.status = 'error';
+        respuesta.msg = 'Error al generar el reporte de movimientos';
         return res.status(500).json(respuesta);
     }
 }
